@@ -671,6 +671,126 @@ em { font-style: italic; color: var(--chalk); }
 }
 .log__stack span:hover { border-color: var(--amber); color: var(--amber); }
 
+/* inline link inside bullets — reads as text, hints on hover */
+.link-inline {
+  color: var(--chalk);
+  border-bottom: 1px dotted var(--amber);
+  padding-bottom: 0.5px;
+  transition: color 220ms var(--ease-swift), border-color 220ms var(--ease-swift);
+}
+.link-inline::after {
+  content: " ↗";
+  font-size: 0.85em;
+  color: var(--dim);
+  transition: color 220ms var(--ease-swift);
+}
+.link-inline:hover { color: var(--amber); border-color: var(--amber); }
+.link-inline:hover::after { color: var(--amber); }
+
+/* ────────── multi-role entry (LinkedIn-style promotion) ────────── */
+.log__entry--multi .log__body { display: block; }
+
+.log__company {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(28px, 2.8vw, 42px);
+  line-height: 1.1;
+  color: var(--chalk);
+  letter-spacing: -0.015em;
+  margin-bottom: 4px;
+}
+.log__company-sub {
+  color: var(--mid);
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.role-block {
+  position: relative;
+  padding: 4px 0 20px 22px;
+  margin-top: 6px;
+}
+.role-block::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 14px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--line);
+}
+.role-block--prior { opacity: 0.96; }
+.role-block--prior::before { background: var(--rule); }
+.role-block--prior .role-block__title { color: var(--bone); }
+
+.role-block__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.role-block__dot {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--amber);
+  background: var(--black);
+  border-radius: 50%;
+  z-index: 2;
+}
+.role-block--prior .role-block__dot { border-color: var(--dim); }
+
+.role-block__title-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.role-block__title {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--chalk);
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+.role-block__dates {
+  color: var(--mid);
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+}
+
+.role-connector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 4px 22px;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  position: relative;
+}
+.role-connector::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+.role-connector__arrow {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    LAB — Specimens
    =══════════════════════════════════════════════════════════════ */

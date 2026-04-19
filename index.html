@@ -158,35 +158,72 @@
 
     <ol class="log__list">
 
-      <!-- 01 Tranga Labs -->
-      <li class="log__entry" data-entry="01">
+      <!-- 01 Tranga Labs — two-role promotion, LinkedIn-style -->
+      <li class="log__entry log__entry--multi" data-entry="01">
         <div class="log__spine" aria-hidden="true">
           <span class="spine__dot"></span>
           <span class="spine__line"></span>
         </div>
         <div class="log__meta mono micro">
           <span class="log__num">#01</span>
-          <span class="log__dates">2025 — present</span>
+          <span class="log__dates">2024 — present</span>
           <span class="log__loc">amsterdam, nl · remote</span>
-          <span class="log__kind">full-time</span>
+          <span class="log__kind">full-time · 2+ yrs</span>
         </div>
         <div class="log__body">
-          <h3 class="log__title"><span class="serif">Tranga Labs</span> <span class="log__role">/ Senior Software Engineer</span></h3>
-          <ul class="bullets">
-            <li>Built the core infrastructure for <em>onlygrowth</em>, later extended into the substrate for several sister micro-SaaS products we launched.</li>
-            <li>Scaled our in-house phone farm from <mark>1 → 30+ devices</mark> via Kubernetes, AWS, and a microservice split — the orchestration, the routing, the failure recovery.</li>
-            <li>Shipped the FastAPI surface powering the web app. Typed contracts, clean boundaries, migrations that don't wake anyone up.</li>
-            <li>Implemented Instagram automation plugins on <code>uiautomator2</code> + <code>adb</code>. Deterministic enough for production; tolerant enough for real devices.</li>
-            <li>Added LLM-driven data agents wired through Gemini 2.5 Pro and o3-mini, with LightRAG and Playwright behind them.</li>
-            <li>Own a self-hosted <code>n8n</code> alert system monitoring the whole fleet — the pager, basically.</li>
-          </ul>
-          <div class="log__stack mono micro">
-            <span>python</span><span>fastapi</span><span>kubernetes</span><span>aws</span><span>digitalocean</span><span>uiautomator2</span><span>adb</span><span>lightrag</span><span>playwright</span><span>gemini 2.5</span><span>o3-mini</span><span>n8n</span>
+          <h3 class="log__company"><span class="serif">Tranga Labs</span></h3>
+          <p class="log__company-sub mono micro">2 roles · promoted <span class="dim">2024 → 2025</span></p>
+
+          <!-- Current role: Senior SWE -->
+          <div class="role-block">
+            <div class="role-block__head">
+              <span class="role-block__dot" aria-hidden="true"></span>
+              <div class="role-block__title-wrap">
+                <h4 class="role-block__title">Senior Software Engineer</h4>
+                <span class="role-block__dates mono micro">2025 — present <span class="dim">· current</span></span>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li>Built the core infrastructure for <em>onlygrowth</em>, later extended into the substrate for several sister micro-SaaS products we launched.</li>
+              <li>Scaled our in-house phone farm from <mark>1 → 30+ devices</mark> via Kubernetes, AWS, and a microservice split — the orchestration, the routing, the failure recovery.</li>
+              <li>Shipped the FastAPI surface powering the web app. Typed contracts, clean boundaries, migrations that don't wake anyone up.</li>
+              <li>Implemented Instagram automation plugins on <code>uiautomator2</code> + <code>adb</code>. Deterministic enough for production; tolerant enough for real devices.</li>
+              <li>Added LLM-driven data agents wired through Gemini 2.5 Pro and o3-mini, with LightRAG and Playwright behind them.</li>
+              <li>Own a self-hosted <code>n8n</code> alert system monitoring the whole fleet — the pager, basically.</li>
+            </ul>
+            <div class="log__stack mono micro">
+              <span>python</span><span>fastapi</span><span>kubernetes</span><span>aws</span><span>digitalocean</span><span>uiautomator2</span><span>adb</span><span>lightrag</span><span>playwright</span><span>gemini 2.5</span><span>o3-mini</span><span>n8n</span>
+            </div>
+          </div>
+
+          <!-- Promotion connector -->
+          <div class="role-connector mono micro" aria-hidden="true">
+            <span class="role-connector__arrow">↑</span>
+            <span>promoted from</span>
+          </div>
+
+          <!-- Earlier role: Lead Backend Engineer -->
+          <div class="role-block role-block--prior">
+            <div class="role-block__head">
+              <span class="role-block__dot" aria-hidden="true"></span>
+              <div class="role-block__title-wrap">
+                <h4 class="role-block__title">Lead Backend Engineer</h4>
+                <span class="role-block__dates mono micro">2024 — 2025</span>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li>Led end-to-end on an AI-driven data platform — ingesting live audio streams, transcribing with Whisper, and producing structured insight through a pipeline of MongoDB, OpenAI, vector stores, message queues, and Playwright.</li>
+              <li>Scaled the engineering team <mark>1 → 5</mark>, vetting backend candidates and setting the bar for what ships.</li>
+              <li>Designed a high-performance analytics backend that later absorbed a <mark>200% workload increase</mark> on Kubernetes, Redis, Grafana, and Pydantic Logfire.</li>
+            </ul>
+            <div class="log__stack mono micro">
+              <span>python</span><span>mongodb</span><span>openai</span><span>whisper</span><span>vector stores</span><span>kubernetes</span><span>redis</span><span>grafana</span><span>logfire</span><span>playwright</span>
+            </div>
           </div>
         </div>
       </li>
 
-      <!-- 02 Tranga Labs — earlier project -->
+      <!-- 02 Infinity / Magicreview -->
       <li class="log__entry" data-entry="02">
         <div class="log__spine" aria-hidden="true">
           <span class="spine__dot"></span>
@@ -194,32 +231,6 @@
         </div>
         <div class="log__meta mono micro">
           <span class="log__num">#02</span>
-          <span class="log__dates">2024 — 2025</span>
-          <span class="log__loc">remote</span>
-          <span class="log__kind">lead · earlier project</span>
-        </div>
-        <div class="log__body">
-          <h3 class="log__title"><span class="serif">Tranga Labs</span> <span class="log__role">/ Lead Backend Engineer · earlier product</span></h3>
-          <ul class="bullets">
-            <li>Led end-to-end on an AI-driven data platform — ingesting live audio streams, transcribing with Whisper, and producing structured insight through a pipeline of MongoDB, OpenAI, vector stores, message queues, and Playwright.</li>
-            <li>Scaled the engineering team <mark>1 → 5</mark>, vetting backend candidates and setting the bar for what ships.</li>
-            <li>Designed a high-performance analytics backend that later absorbed a <mark>200% workload increase</mark> on Kubernetes, Redis, Grafana, and Pydantic Logfire.</li>
-            <li>Promoted onto the platform team that became the current role.</li>
-          </ul>
-          <div class="log__stack mono micro">
-            <span>python</span><span>mongodb</span><span>openai</span><span>whisper</span><span>vector stores</span><span>kubernetes</span><span>redis</span><span>grafana</span><span>logfire</span><span>playwright</span>
-          </div>
-        </div>
-      </li>
-
-      <!-- 03 Infinity / Magicpitch -->
-      <li class="log__entry" data-entry="03">
-        <div class="log__spine" aria-hidden="true">
-          <span class="spine__dot"></span>
-          <span class="spine__line"></span>
-        </div>
-        <div class="log__meta mono micro">
-          <span class="log__num">#03</span>
           <span class="log__dates">2023 — 2024</span>
           <span class="log__loc">uk · remote</span>
           <span class="log__kind">team lead</span>
@@ -227,7 +238,7 @@
         <div class="log__body">
           <h3 class="log__title"><span class="serif">Infinity</span> <span class="log__role">/ Software Engineer → Team Lead</span></h3>
           <ul class="bullets">
-            <li>Built <em>Magicreview</em> — a business review management platform — launched in Dubai and onboarded <mark>5+ partners</mark>.</li>
+            <li>Built <a href="https://magicreview.ai" target="_blank" rel="noopener" class="link-inline">Magicreview</a> — a business review management platform — launched in Dubai and onboarded <mark>5+ partners</mark>.</li>
             <li>Scaled a dev team's output <mark>5×</mark> and was awarded <em>Team Lead</em> for the communication and project-management side.</li>
             <li>Built scraping agents for partner work — <em>Magicpitch</em>, <em>bridging365 UK</em> — on Playwright and Selenium, routing proxies past Cloudflare, Datadome, and fingerprinting defences.</li>
             <li>Operated a MongoDB cluster serving <mark>8+ services</mark> in Docker containers.</li>
@@ -239,14 +250,14 @@
         </div>
       </li>
 
-      <!-- 04 WePerch -->
-      <li class="log__entry" data-entry="04">
+      <!-- 03 WePerch -->
+      <li class="log__entry" data-entry="03">
         <div class="log__spine" aria-hidden="true">
           <span class="spine__dot"></span>
           <span class="spine__line"></span>
         </div>
         <div class="log__meta mono micro">
-          <span class="log__num">#04</span>
+          <span class="log__num">#03</span>
           <span class="log__dates">2022 — 2023</span>
           <span class="log__loc">e-commerce · remote</span>
           <span class="log__kind">engineer</span>
@@ -263,14 +274,14 @@
         </div>
       </li>
 
-      <!-- 05 Freelancer -->
-      <li class="log__entry" data-entry="05">
+      <!-- 04 Freelancer -->
+      <li class="log__entry" data-entry="04">
         <div class="log__spine" aria-hidden="true">
           <span class="spine__dot"></span>
           <span class="spine__line"></span>
         </div>
         <div class="log__meta mono micro">
-          <span class="log__num">#05</span>
+          <span class="log__num">#04</span>
           <span class="log__dates">2021 — 2023</span>
           <span class="log__loc">independent</span>
           <span class="log__kind">freelance</span>
