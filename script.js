@@ -163,7 +163,7 @@
 
     let w = 0, h = 0;
     let points = [];     // glyph grid
-    let traces = [];     // PCB-style polylines with traveling pulses
+    let arms   = [];     // articulated robot arms with end-effector trails
     let gears  = [];     // tiny rotating gears in corners
     let mx = -9999, my = -9999;
     let lastPointer = 0;
@@ -179,7 +179,7 @@
       canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       buildGrid();
-      buildTraces();
+      buildArms();
       buildGears();
     };
 
@@ -201,57 +201,142 @@
       }
     };
 
-    /* ── circuit traces (Manhattan polylines with signal pulses) ── */
-    const makeTrace = () => {
-      const pts = [[rand(-100, w + 100), rand(-100, h + 100)]];
-      const nSegs = 3 + Math.floor(Math.random() * 4);
-      let horiz = Math.random() < 0.5;
-      let [x, y] = pts[0];
-      for (let i = 0; i < nSegs; i++) {
-        const len = rand(80, 320);
-        const dir = Math.random() < 0.5 ? 1 : -1;
-        if (horiz) x += len * dir; else y += len * dir;
-        x = Math.max(-200, Math.min(w + 200, x));
-        y = Math.max(-200, Math.min(h + 200, y));
-        pts.push([x, y]);
-        horiz = !horiz;
-      }
-      const segLens = [];
-      let total = 0;
-      for (let i = 1; i < pts.length; i++) {
-        const d = Math.abs(pts[i][0] - pts[i-1][0]) + Math.abs(pts[i][1] - pts[i-1][1]);
-        segLens.push(d);
-        total += d;
-      }
-      const pulseCount = 1 + (Math.random() < 0.45 ? 1 : 0);
-      const pulses = [];
-      for (let i = 0; i < pulseCount; i++) {
-        pulses.push({ pos: Math.random() * total, speed: rand(0.7, 2.2) });
-      }
-      return { pts, segLens, total, pulses };
+    /* ── articulated robot arms (multi-joint, oscillating) ── */
+    const buildArms = () => {
+      // Each arm anchors to a viewport edge, out of the main reading path.
+      // Links define length + motion profile: base angle, oscillation amplitude,
+      // angular frequency, and phase. The first link's baseAngle points the arm
+      // inward from the edge.
+      const common = () => ({
+        freq:  rand(0.00018, 0.00032),
+        phase: rand(0, Math.PI * 2),
+      });
+
+      arms = [
+        // Left edge, upper-third
+        { base: [-20, h * 0.22], trail: [], links: [
+            { length: Math.min(260, w * 0.22), baseAngle: 0.15,           amp: 0.55, ...common() },
+            { length: Math.min(190, w * 0.17), baseAngle: -0.4,           amp: 0.95, ...common() },
+            { length: Math.min(120, w * 0.10), baseAngle: 0.3,            amp: 1.2,  ...common() },
+        ]},
+        // Right edge, middle
+        { base: [w + 20, h * 0.55], trail: [], links: [
+            { length: Math.min(280, w * 0.24), baseAngle: Math.PI - 0.2,  amp: 0.6,  ...common() },
+            { length: Math.min(210, w * 0.18), baseAngle: 0.5,            amp: 1.0,  ...common() },
+            { length: Math.min(130, w * 0.11), baseAngle: -0.35,          amp: 1.1,  ...common() },
+        ]},
+        // Bottom-left
+        { base: [w * 0.12, h + 20], trail: [], links: [
+            { length: Math.min(220, h * 0.26), baseAngle: -Math.PI / 2 + 0.1, amp: 0.45, ...common() },
+            { length: Math.min(170, h * 0.20), baseAngle: -0.5,              amp: 1.1,  ...common() },
+        ]},
+        // Top, slightly right of center
+        { base: [w * 0.68, -20], trail: [], links: [
+            { length: Math.min(230, h * 0.26), baseAngle: Math.PI / 2 - 0.1, amp: 0.5,  ...common() },
+            { length: Math.min(170, h * 0.20), baseAngle: 0.6,               amp: 1.05, ...common() },
+            { length: Math.min(110, h * 0.12), baseAngle: -0.3,              amp: 1.25, ...common() },
+        ]},
+      ];
     };
 
-    const buildTraces = () => {
-      traces = [];
-      const count = Math.min(11, Math.max(5, Math.floor((w * h) / 220000)));
-      for (let i = 0; i < count; i++) traces.push(makeTrace());
-    };
-
-    const posAlong = (trace, pos) => {
-      let p = ((pos % trace.total) + trace.total) % trace.total;
+    const updateArm = (arm, t) => {
+      let x = arm.base[0];
+      let y = arm.base[1];
       let acc = 0;
-      for (let i = 0; i < trace.segLens.length; i++) {
-        const L = trace.segLens[i];
-        if (acc + L >= p) {
-          const t = L > 0 ? (p - acc) / L : 0;
-          const [x1, y1] = trace.pts[i];
-          const [x2, y2] = trace.pts[i+1];
-          return { x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t };
-        }
-        acc += L;
+      const joints = [[x, y]];
+      for (const L of arm.links) {
+        const ang = L.baseAngle + Math.sin(t * L.freq + L.phase) * L.amp;
+        acc += ang;
+        x += Math.cos(acc) * L.length;
+        y += Math.sin(acc) * L.length;
+        joints.push([x, y]);
       }
-      const last = trace.pts[trace.pts.length - 1];
-      return { x: last[0], y: last[1] };
+      // append end-effector to trail (throttle: only every ~30ms)
+      const last = arm.trail[arm.trail.length - 1];
+      if (!last || t - last.t > 35) {
+        arm.trail.push({ x, y, t });
+        if (arm.trail.length > 90) arm.trail.shift();
+      }
+      // drop old trail points
+      while (arm.trail.length && t - arm.trail[0].t > 4500) arm.trail.shift();
+      return joints;
+    };
+
+    const drawArm = (arm, t) => {
+      const joints = updateArm(arm, t);
+
+      // end-effector trail (fades with age)
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 1.2;
+      for (let i = 1; i < arm.trail.length; i++) {
+        const p0 = arm.trail[i - 1];
+        const p1 = arm.trail[i];
+        const age = t - p1.t;
+        const a = Math.max(0, 1 - age / 4500) * 0.45;
+        ctx.strokeStyle = `rgba(255,107,43,${a.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.stroke();
+      }
+
+      // arm links
+      ctx.strokeStyle = 'rgba(138,134,132,0.42)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for (let i = 0; i < joints.length; i++) {
+        const [x, y] = joints[i];
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // parallel inner "structural" line offset slightly — gives the link a
+      // mechanical silhouette instead of a single hairline.
+      ctx.strokeStyle = 'rgba(138,134,132,0.14)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let i = 0; i < joints.length; i++) {
+        const [x, y] = joints[i];
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // joints
+      for (let i = 0; i < joints.length; i++) {
+        const [x, y] = joints[i];
+        if (i === 0) {
+          // base mount: small square, amber dot
+          ctx.strokeStyle = 'rgba(138,134,132,0.55)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x - 6, y - 6, 12, 12);
+          ctx.fillStyle = 'rgba(255,107,43,0.6)';
+          ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+        } else if (i === joints.length - 1) {
+          // end-effector: amber target
+          ctx.fillStyle = 'rgba(255,107,43,0.85)';
+          ctx.beginPath(); ctx.arc(x, y, 3.6, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,107,43,0.5)';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.stroke();
+          // tick marks
+          ctx.strokeStyle = 'rgba(255,107,43,0.6)';
+          ctx.beginPath();
+          ctx.moveTo(x - 13, y); ctx.lineTo(x - 10, y);
+          ctx.moveTo(x + 10, y); ctx.lineTo(x + 13, y);
+          ctx.moveTo(x, y - 13); ctx.lineTo(x, y - 10);
+          ctx.moveTo(x, y + 10); ctx.lineTo(x, y + 13);
+          ctx.stroke();
+        } else {
+          // intermediate joint: solid black center, hairline ring
+          ctx.fillStyle = 'rgba(0,0,0,1)';
+          ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = 'rgba(138,134,132,0.7)';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,107,43,0.45)';
+          ctx.beginPath(); ctx.arc(x, y, 1.4, 0, Math.PI * 2); ctx.fill();
+        }
+      }
     };
 
     /* ── corner gears ── */
@@ -300,40 +385,13 @@
 
       const hasCursor = (performance.now() - lastPointer) < 4000;
 
-      // --- LAYER 1: circuit traces
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      for (const trace of traces) {
-        ctx.strokeStyle = 'rgba(138,134,132,0.11)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (let i = 0; i < trace.pts.length; i++) {
-          const [x, y] = trace.pts[i];
-          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-        // junction nodes
-        ctx.fillStyle = 'rgba(138,134,132,0.32)';
-        for (let i = 0; i < trace.pts.length; i++) {
-          const [x, y] = trace.pts[i];
-          ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
-        }
-        // signal pulses with fading tails
-        for (const p of trace.pulses) {
-          p.pos = (p.pos + p.speed) % trace.total;
-          for (let j = 0; j < 16; j++) {
-            const tp = posAlong(trace, p.pos - j * 4);
-            const a = (1 - j / 16) * 0.88;
-            ctx.fillStyle = `rgba(255,107,43,${a.toFixed(3)})`;
-            ctx.beginPath();
-            ctx.arc(tp.x, tp.y, Math.max(0.35, 2.4 - j * 0.13), 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      }
-
-      // --- LAYER 2: corner gears
+      // --- LAYER 1: corner gears
       for (const g of gears) drawGear(g, t);
+
+      // --- LAYER 2: articulated robot arms
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      for (const arm of arms) drawArm(arm, t);
 
       // --- LAYER 3: glyph field
       ctx.font = '10px "JetBrains Mono", ui-monospace, monospace';

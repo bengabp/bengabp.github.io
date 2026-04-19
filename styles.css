@@ -1300,9 +1300,10 @@ em { font-style: italic; color: var(--chalk); }
 .underline-ink::after {
   content: "";
   position: absolute;
-  left: 0; right: 0;
-  bottom: 0.08em;
-  height: 0.06em;
+  left: 0;
+  right: 0;
+  bottom: -0.02em;
+  height: 0.05em;
   background: var(--amber);
   opacity: 0.9;
 }
