@@ -150,7 +150,7 @@
     sectionTargets.forEach(t => navIO.observe(t));
   }
 
-  /* ─── reactive background glyph field ─── */
+  /* ─── reactive background: circuit substrate + glyph field ─── */
   if (!reduceMotion) {
     const canvas = document.createElement('canvas');
     canvas.className = 'doodles';
@@ -162,9 +162,13 @@
     const glyphs = ['·', '·', '·', '·', '·', '·', '+', '+', '○', '×', '◦', '∙'];
 
     let w = 0, h = 0;
-    let points = [];
+    let points = [];     // glyph grid
+    let traces = [];     // PCB-style polylines with traveling pulses
+    let gears  = [];     // tiny rotating gears in corners
     let mx = -9999, my = -9999;
     let lastPointer = 0;
+
+    const rand = (a, b) => a + Math.random() * (b - a);
 
     const resize = () => {
       w = window.innerWidth;
@@ -175,8 +179,11 @@
       canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       buildGrid();
+      buildTraces();
+      buildGears();
     };
 
+    /* ── glyph grid ── */
     const buildGrid = () => {
       points = [];
       const step = 76;
@@ -194,14 +201,145 @@
       }
     };
 
+    /* ── circuit traces (Manhattan polylines with signal pulses) ── */
+    const makeTrace = () => {
+      const pts = [[rand(-100, w + 100), rand(-100, h + 100)]];
+      const nSegs = 3 + Math.floor(Math.random() * 4);
+      let horiz = Math.random() < 0.5;
+      let [x, y] = pts[0];
+      for (let i = 0; i < nSegs; i++) {
+        const len = rand(80, 320);
+        const dir = Math.random() < 0.5 ? 1 : -1;
+        if (horiz) x += len * dir; else y += len * dir;
+        x = Math.max(-200, Math.min(w + 200, x));
+        y = Math.max(-200, Math.min(h + 200, y));
+        pts.push([x, y]);
+        horiz = !horiz;
+      }
+      const segLens = [];
+      let total = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const d = Math.abs(pts[i][0] - pts[i-1][0]) + Math.abs(pts[i][1] - pts[i-1][1]);
+        segLens.push(d);
+        total += d;
+      }
+      const pulseCount = 1 + (Math.random() < 0.45 ? 1 : 0);
+      const pulses = [];
+      for (let i = 0; i < pulseCount; i++) {
+        pulses.push({ pos: Math.random() * total, speed: rand(0.7, 2.2) });
+      }
+      return { pts, segLens, total, pulses };
+    };
+
+    const buildTraces = () => {
+      traces = [];
+      const count = Math.min(11, Math.max(5, Math.floor((w * h) / 220000)));
+      for (let i = 0; i < count; i++) traces.push(makeTrace());
+    };
+
+    const posAlong = (trace, pos) => {
+      let p = ((pos % trace.total) + trace.total) % trace.total;
+      let acc = 0;
+      for (let i = 0; i < trace.segLens.length; i++) {
+        const L = trace.segLens[i];
+        if (acc + L >= p) {
+          const t = L > 0 ? (p - acc) / L : 0;
+          const [x1, y1] = trace.pts[i];
+          const [x2, y2] = trace.pts[i+1];
+          return { x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t };
+        }
+        acc += L;
+      }
+      const last = trace.pts[trace.pts.length - 1];
+      return { x: last[0], y: last[1] };
+    };
+
+    /* ── corner gears ── */
+    const buildGears = () => {
+      gears = [
+        { cx: 56,     cy: 56,     r: 26, teeth: 14, dir:  1, speed: 0.010 },
+        { cx: w - 56, cy: h - 56, r: 34, teeth: 18, dir: -1, speed: 0.008 },
+      ];
+    };
+
+    const drawGear = (g, t) => {
+      const rot = t * g.speed * g.dir;
+      ctx.save();
+      ctx.translate(g.cx, g.cy);
+      ctx.rotate(rot);
+      ctx.strokeStyle = 'rgba(138,134,132,0.18)';
+      ctx.lineWidth = 1;
+      // inner & outer circles
+      ctx.beginPath(); ctx.arc(0, 0, g.r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, g.r - 6, 0, Math.PI * 2); ctx.stroke();
+      // teeth
+      for (let i = 0; i < g.teeth; i++) {
+        const a = (Math.PI * 2 / g.teeth) * i;
+        const x1 = Math.cos(a) * g.r;
+        const y1 = Math.sin(a) * g.r;
+        const x2 = Math.cos(a) * (g.r + 4);
+        const y2 = Math.sin(a) * (g.r + 4);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+      // hub
+      ctx.fillStyle = 'rgba(255,107,43,0.28)';
+      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.fill();
+      // registration mark
+      ctx.strokeStyle = 'rgba(255,107,43,0.35)';
+      ctx.beginPath(); ctx.moveTo(0, -g.r); ctx.lineTo(0, -g.r + 5); ctx.stroke();
+      ctx.restore();
+    };
+
+    /* ── main draw loop ── */
     const tick = (t) => {
       if (document.hidden) { requestAnimationFrame(tick); return; }
       ctx.clearRect(0, 0, w, h);
+
+      const hasCursor = (performance.now() - lastPointer) < 4000;
+
+      // --- LAYER 1: circuit traces
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      for (const trace of traces) {
+        ctx.strokeStyle = 'rgba(138,134,132,0.11)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i < trace.pts.length; i++) {
+          const [x, y] = trace.pts[i];
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        // junction nodes
+        ctx.fillStyle = 'rgba(138,134,132,0.32)';
+        for (let i = 0; i < trace.pts.length; i++) {
+          const [x, y] = trace.pts[i];
+          ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+        }
+        // signal pulses with fading tails
+        for (const p of trace.pulses) {
+          p.pos = (p.pos + p.speed) % trace.total;
+          for (let j = 0; j < 16; j++) {
+            const tp = posAlong(trace, p.pos - j * 4);
+            const a = (1 - j / 16) * 0.88;
+            ctx.fillStyle = `rgba(255,107,43,${a.toFixed(3)})`;
+            ctx.beginPath();
+            ctx.arc(tp.x, tp.y, Math.max(0.35, 2.4 - j * 0.13), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // --- LAYER 2: corner gears
+      for (const g of gears) drawGear(g, t);
+
+      // --- LAYER 3: glyph field
       ctx.font = '10px "JetBrains Mono", ui-monospace, monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const hasCursor = (performance.now() - lastPointer) < 4000;
       const R  = 180;
       const R2 = R * R;
 
@@ -212,14 +350,12 @@
         const d2 = dx * dx + dy * dy;
         const fade = (hasCursor && d2 < R2) ? (1 - Math.sqrt(d2) / R) : 0;
 
-        // magnetic lean toward cursor
         const pull = fade * 0.32;
         p.x = p.hx + dx * pull;
         p.y = p.hy + dy * pull;
 
-        // ambient breathing pulse
         const pulse = 0.5 + 0.5 * Math.sin(t * 0.0007 * p.spd + p.phase);
-        const base  = 0.028 + pulse * 0.028;        // ~0.03–0.06
+        const base  = 0.028 + pulse * 0.028;
         const alpha = base + fade * 0.7;
 
         if (fade > 0.22) {
@@ -230,7 +366,7 @@
         ctx.fillText(p.g, p.x, p.y);
       }
 
-      // small amber ring sweeping outward from cursor, always-on trace
+      // --- LAYER 4: cursor ring trace
       if (hasCursor) {
         const ringR = 26 + ((t * 0.08) % 48);
         const ringA = Math.max(0, 0.18 - (ringR - 26) / 48 * 0.18);
@@ -238,6 +374,16 @@
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(mx, my, ringR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // small crosshair — servo targeting style
+        ctx.strokeStyle = 'rgba(255, 107, 43, 0.4)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(mx - 14, my); ctx.lineTo(mx - 6, my);
+        ctx.moveTo(mx + 6,  my); ctx.lineTo(mx + 14, my);
+        ctx.moveTo(mx, my - 14); ctx.lineTo(mx, my - 6);
+        ctx.moveTo(mx, my + 6);  ctx.lineTo(mx, my + 14);
         ctx.stroke();
       }
 
