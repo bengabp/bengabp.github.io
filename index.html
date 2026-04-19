@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Benedict Onyebuchi — Field Report 2026</title>
+<meta name="description" content="Benedict Onyebuchi. Backend engineer, data agents, cloud & scalable systems. Robotics at night. Lagos → Moscow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="spot" aria-hidden="true"></div>
+<div class="scanline" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="topbar__row">
+    <a href="#top" class="ident">
+      <span class="ident__glyph" aria-hidden="true">
+        <svg viewBox="0 0 12 12" width="12" height="12"><circle cx="6" cy="6" r="2.5" fill="currentColor"/><circle cx="6" cy="6" r="5.2" fill="none" stroke="currentColor" stroke-width="0.6"/></svg>
+      </span>
+      <span class="ident__code">BEN·01</span>
+      <span class="ident__sep">//</span>
+      <span class="ident__label">field report · rev 7</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#brief"><span class="nav__num">01</span> brief</a>
+      <a href="#log"><span class="nav__num">02</span> log</a>
+      <a href="#lab"><span class="nav__num">03</span> lab</a>
+      <a href="#stack"><span class="nav__num">04</span> stack</a>
+      <a href="#repos"><span class="nav__num">05</span> repos</a>
+      <a href="#contact"><span class="nav__num">06</span> signal</a>
+    </nav>
+    <div class="status">
+      <span class="status__pill"><span class="blip"></span>available</span>
+      <span class="clock" id="clock" aria-label="Local time in Lagos">--:--:--</span>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section class="hero">
+    <div class="hero__bg" aria-hidden="true">
+      <svg class="hero__grid" viewBox="0 0 100 100" preserveAspectRatio="none"><defs><pattern id="g" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M 4 0 L 0 0 0 4" fill="none" stroke="currentColor" stroke-width="0.08"/></pattern></defs><rect width="100" height="100" fill="url(#g)"/></svg>
+    </div>
+
+    <div class="hero__meta mono micro">
+      <span><em>file</em> ben·01</span>
+      <span class="dot-sep">·</span>
+      <span><em>lat</em> 6.524°N</span>
+      <span class="dot-sep">·</span>
+      <span><em>lon</em> 3.379°E</span>
+      <span class="dot-sep">·</span>
+      <span><em>vector</em> lagos → moscow ↗</span>
+      <span class="dot-sep">·</span>
+      <span><em>clearance</em> public</span>
+    </div>
+
+    <h1 class="hero__name" aria-label="Benedict Onyebuchi">
+      <span class="hero__first">Benedict</span>
+      <span class="hero__last">Onyebuchi<span class="hero__punct">.</span></span>
+    </h1>
+
+    <p class="hero__role">
+      <span class="mono">backend · data agents · cloud &amp; scalable systems</span>
+      <br>
+      <span class="serif italic">&mdash; with a second shift in</span>
+      <span class="mono amber">robotics · embedded · computer vision</span>
+    </p>
+
+    <div class="hero__ticker" aria-hidden="true">
+      <div class="ticker__track">
+        <span>5+ years shipping</span><span>·</span>
+        <span>40+ apps delivered</span><span>·</span>
+        <span>3000+ beta users</span><span>·</span>
+        <span>team scaled 1 → 5</span><span>·</span>
+        <span>phone farm 1 → 30+</span><span>·</span>
+        <span>gearbox rev 6 · 41:1</span><span>·</span>
+        <span>python · k8s · fastapi · mongo · opencv · esp32</span><span>·</span>
+        <span>5+ years shipping</span><span>·</span>
+        <span>40+ apps delivered</span><span>·</span>
+        <span>3000+ beta users</span><span>·</span>
+        <span>team scaled 1 → 5</span><span>·</span>
+        <span>phone farm 1 → 30+</span><span>·</span>
+        <span>gearbox rev 6 · 41:1</span><span>·</span>
+        <span>python · k8s · fastapi · mongo · opencv · esp32</span><span>·</span>
+      </div>
+    </div>
+
+    <div class="hero__foot">
+      <a class="scrollhint mono micro" href="#brief">
+        <span class="scrollhint__line" aria-hidden="true"></span>
+        scroll to begin &nbsp;↓
+      </a>
+      <div class="hero__tag mono micro">
+        <span>status</span>
+        <span class="tag__bar" aria-hidden="true"></span>
+        <span class="amber">open to remote roles · taking on consulting</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ BRIEF ═══════════════════════ -->
+  <section id="brief" class="section brief reveal">
+    <div class="section__head">
+      <span class="section__num mono">§ 01</span>
+      <h2 class="section__title"><span class="serif italic">Subject</span> brief.</h2>
+      <span class="section__rule" aria-hidden="true"></span>
+    </div>
+
+    <div class="brief__grid">
+      <div class="brief__copy">
+        <p class="lede">
+          Five years of building the unglamorous half of the internet — the APIs, the pipelines, the queues, the scrapers, the alert rules that wake someone up at 4 a.m. I lead teams, ship products, and obsess over the moment when a system stops being a diagram and starts actually running in production.
+        </p>
+        <p class="lede">
+          <span class="serif italic" style="font-size:1.1em">Lately</span> I've been taking that instinct off the screen. Planetary gearboxes designed in Fusion 360, robot arms with limit switches and home routines, an offline English–Russian learning app that runs on-device AI, hand-tracking with OpenCV. Software is the day job. Hardware is where I'm learning again.
+        </p>
+        <p class="lede">
+          <span class="serif italic" style="font-size:1.1em">Next stop</span>, Moscow — studying the Russian preparatory course at Moscow Polytechnic. Visa invitation pending; the work doesn't pause.
+        </p>
+      </div>
+
+      <aside class="brief__panel">
+        <div class="panel__head mono micro caps">
+          <span>subject</span>
+          <span class="panel__rev">rev 7 · 2026·04·19</span>
+        </div>
+        <dl class="panel__list mono">
+          <dt>name</dt><dd>Benedict Onyebuchi</dd>
+          <dt>alias</dt><dd>Бенедикт · @bengabp</dd>
+          <dt>base</dt><dd>Lagos, Nigeria</dd>
+          <dt>next</dt><dd>Moscow, RU <span class="dim">(pending приглашение)</span></dd>
+          <dt>study</dt><dd>Moscow Polytechnic<br><span class="dim">Russian preparatory course</span></dd>
+          <dt>role</dt><dd>senior software engineer</dd>
+          <dt>focus</dt><dd>backend · data · agents · cloud</dd>
+          <dt>tz now</dt><dd>UTC+01 · <span class="dim">→ UTC+03 soon</span></dd>
+          <dt>langs</dt><dd>EN · RU <span class="dim">(learning, A2-ish)</span></dd>
+          <dt>status</dt><dd><span class="blip"></span> available</dd>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ LOG ═══════════════════════ -->
+  <section id="log" class="section log reveal">
+    <div class="section__head">
+      <span class="section__num mono">§ 02</span>
+      <h2 class="section__title"><span class="serif italic">Transmission</span> log.</h2>
+      <span class="section__rule" aria-hidden="true"></span>
+      <p class="section__sub mono micro">five years · reverse-chronological · bullets are load-bearing, not decorative.</p>
+    </div>
+
+    <ol class="log__list">
+
+      <!-- 01 Tranga Labs -->
+      <li class="log__entry" data-entry="01">
+        <div class="log__spine" aria-hidden="true">
+          <span class="spine__dot"></span>
+          <span class="spine__line"></span>
+        </div>
+        <div class="log__meta mono micro">
+          <span class="log__num">#01</span>
+          <span class="log__dates">2025 — present</span>
+          <span class="log__loc">amsterdam, nl · remote</span>
+          <span class="log__kind">full-time</span>
+        </div>
+        <div class="log__body">
+          <h3 class="log__title"><span class="serif">Tranga Labs</span> <span class="log__role">/ Senior Software Engineer</span></h3>
+          <ul class="bullets">
+            <li>Built the core infrastructure for <em>onlygrowth</em>, later extended into the substrate for several sister micro-SaaS products we launched.</li>
+            <li>Scaled our in-house phone farm from <mark>1 → 30+ devices</mark> via Kubernetes, AWS, and a microservice split — the orchestration, the routing, the failure recovery.</li>
+            <li>Shipped the FastAPI surface powering the web app. Typed contracts, clean boundaries, migrations that don't wake anyone up.</li>
+            <li>Implemented Instagram automation plugins on <code>uiautomator2</code> + <code>adb</code>. Deterministic enough for production; tolerant enough for real devices.</li>
+            <li>Added LLM-driven data agents wired through Gemini 2.5 Pro and o3-mini, with LightRAG and Playwright behind them.</li>
+            <li>Own a self-hosted <code>n8n</code> alert system monitoring the whole fleet — the pager, basically.</li>
+          </ul>
+          <div class="log__stack mono micro">
+            <span>python</span><span>fastapi</span><span>kubernetes</span><span>aws</span><span>digitalocean</span><span>uiautomator2</span><span>adb</span><span>lightrag</span><span>playwright</span><span>gemini 2.5</span><span>o3-mini</span><span>n8n</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- 02 EaveAI -->
+      <li class="log__entry" data-entry="02">
+        <div class="log__spine" aria-hidden="true">
+          <span class="spine__dot"></span>
+          <span class="spine__line"></span>
+        </div>
+        <div class="log__meta mono micro">
+          <span class="log__num">#02</span>
+          <span class="log__dates">2024 — 2025</span>
+          <span class="log__loc">web3 · remote</span>
+          <span class="log__kind">lead</span>
+        </div>
+        <div class="log__body">
+          <h3 class="log__title"><span class="serif">EaveAI</span> <span class="log__role">/ Lead Backend Engineer</span></h3>
+          <ul class="bullets">
+            <li>Led end-to-end on a Web3 data pipeline pulling insight out of Twitter Spaces and on-chain market data — MongoDB, OpenAI (incl. Whisper), vector stores, message queues, Playwright.</li>
+            <li>Scaled the engineering team <mark>1 → 5</mark>, vetting backend candidates and setting the bar for what ships.</li>
+            <li>Launched <em>Eave</em>, <mark>3000+ beta users</mark> in the gate.</li>
+            <li>Designed a high-performance crypto-market backend that later absorbed a <mark>200% workload increase</mark> on Kubernetes, Redis, Grafana, and Pydantic Logfire.</li>
+          </ul>
+          <div class="log__stack mono micro">
+            <span>python</span><span>mongodb</span><span>openai</span><span>whisper</span><span>vector stores</span><span>kubernetes</span><span>redis</span><span>grafana</span><span>logfire</span><span>playwright</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- 03 Infinity / Magicpitch -->
+      <li class="log__entry" data-entry="03">
+        <div class="log__spine" aria-hidden="true">
+          <span class="spine__dot"></span>
+          <span class="spine__line"></span>
+        </div>
+        <div class="log__meta mono micro">
+          <span class="log__num">#03</span>
+          <span class="log__dates">2023 — 2024</span>
+          <span class="log__loc">uk · remote</span>
+          <span class="log__kind">team lead</span>
+        </div>
+        <div class="log__body">
+          <h3 class="log__title"><span class="serif">Infinity</span> <span class="log__role">/ Software Engineer → Team Lead</span></h3>
+          <ul class="bullets">
+            <li>Built <em>Magicreview</em> — a business review management platform — launched in Dubai and onboarded <mark>5+ partners</mark>.</li>
+            <li>Scaled a dev team's output <mark>5×</mark> and was awarded <em>Team Lead</em> for the communication and project-management side.</li>
+            <li>Built scraping agents for partner work — <em>Magicpitch</em>, <em>bridging365 UK</em> — on Playwright and Selenium, routing proxies past Cloudflare, Datadome, and fingerprinting defences.</li>
+            <li>Operated a MongoDB cluster serving <mark>8+ services</mark> in Docker containers.</li>
+            <li>Co-planned core product direction with the CTO.</li>
+          </ul>
+          <div class="log__stack mono micro">
+            <span>python</span><span>playwright</span><span>selenium</span><span>mongodb</span><span>docker</span><span>proxies</span><span>anti-bot</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- 04 WePerch -->
+      <li class="log__entry" data-entry="04">
+        <div class="log__spine" aria-hidden="true">
+          <span class="spine__dot"></span>
+          <span class="spine__line"></span>
+        </div>
+        <div class="log__meta mono micro">
+          <span class="log__num">#04</span>
+          <span class="log__dates">2022 — 2023</span>
+          <span class="log__loc">e-commerce · remote</span>
+          <span class="log__kind">engineer</span>
+        </div>
+        <div class="log__body">
+          <h3 class="log__title"><span class="serif">WePerch</span> <span class="log__role">/ Software Engineer</span></h3>
+          <ul class="bullets">
+            <li>Built a pricing-aggregation pipeline squeezing speed out of asyncio at every layer.</li>
+            <li>Worked closely with the CTO on solution design for the hard calls.</li>
+          </ul>
+          <div class="log__stack mono micro">
+            <span>python</span><span>asyncio</span><span>scraping</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- 05 Freelancer -->
+      <li class="log__entry" data-entry="05">
+        <div class="log__spine" aria-hidden="true">
+          <span class="spine__dot"></span>
+          <span class="spine__line"></span>
+        </div>
+        <div class="log__meta mono micro">
+          <span class="log__num">#05</span>
+          <span class="log__dates">2021 — 2023</span>
+          <span class="log__loc">independent</span>
+          <span class="log__kind">freelance</span>
+        </div>
+        <div class="log__body">
+          <h3 class="log__title"><span class="serif">Freelancer</span> <span class="log__role">/ Software Engineer</span></h3>
+          <ul class="bullets">
+            <li>Shipped <mark>40+ applications</mark> across healthcare, marketing, and education on Flutter, Django, FastAPI, React, and Selenium.</li>
+            <li>Advised <mark>20+ clients</mark> on scalable microservices and system architecture for high availability.</li>
+            <li>Taught <mark>15+ students</mark> software engineering and programming fundamentals.</li>
+          </ul>
+          <div class="log__stack mono micro">
+            <span>flutter</span><span>django</span><span>fastapi</span><span>react</span><span>selenium</span><span>teaching</span>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ═══════════════════════ LAB ═══════════════════════ -->
+  <section id="lab" class="section lab reveal">
+    <div class="section__head">
+      <span class="section__num mono">§ 03</span>
+      <h2 class="section__title"><span class="serif italic">Lab</span> — after hours.</h2>
+      <span class="section__rule" aria-hidden="true"></span>
+      <p class="section__sub mono micro">the second shift · gears, print beds, soldering irons, fusion 360 iterations.</p>
+    </div>
+
+    <!-- Featured project: Planetary gearbox -->
+    <article class="specimen specimen--hero">
+      <div class="specimen__left">
+        <div class="gearbox" aria-hidden="true">
+          <svg viewBox="-200 -200 400 400" class="gearbox__svg">
+            <defs>
+              <radialGradient id="gearGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ff7a3a" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#ff6b2b" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+
+            <!-- ambient halo -->
+            <circle class="gearbox__halo" r="195" fill="url(#gearGrad)"/>
+
+            <!-- Ring gear (static) -->
+            <g class="gearbox__ring">
+              <circle r="180" fill="none" stroke="currentColor" stroke-width="0.8" stroke-opacity="0.5"/>
+              <circle r="170" fill="none" stroke="currentColor" stroke-width="0.5" stroke-opacity="0.3"/>
+              <g id="ringTeeth"></g>
+            </g>
+
+            <!-- Carrier with 6 planets -->
+            <g class="gearbox__carrier">
+              <g transform="rotate(0) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
+              <g transform="rotate(60) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
+              <g transform="rotate(120) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
+              <g transform="rotate(180) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
+              <g transform="rotate(240) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
+              <g transform="rotate(300) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
+            </g>
+
+            <!-- Sun gear -->
+            <g class="gearbox__sun">
+              <circle r="48" fill="none" stroke="currentColor" stroke-width="1"/>
+              <g id="sunTeeth"></g>
+              <circle r="8" fill="currentColor"/>
+              <line x1="0" y1="-48" x2="0" y2="-36" stroke="currentColor" stroke-width="1"/>
+            </g>
+
+            <!-- crosshair measurement lines -->
+            <g class="gearbox__cross" stroke="currentColor" stroke-opacity="0.15" stroke-width="0.4">
+              <line x1="-200" y1="0" x2="200" y2="0" stroke-dasharray="2 4"/>
+              <line x1="0" y1="-200" x2="0" y2="200" stroke-dasharray="2 4"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="gearbox__legend mono micro">
+          <span><span class="lg-dot amber"></span>sun · input · 3s/rev</span>
+          <span><span class="lg-dot"></span>carrier · output · 123s/rev</span>
+          <span><span class="lg-dot"></span>6 × planet · bearing-mounted</span>
+        </div>
+      </div>
+
+      <div class="specimen__right">
+        <div class="specimen__kicker mono micro caps">
+          <span>03·A</span>
+          <span class="dim">/ featured specimen</span>
+        </div>
+        <h3 class="specimen__title"><span class="serif italic">41 : 1</span> planetary gearbox.</h3>
+        <p class="specimen__lede">
+          Six iterations in Fusion 360. Two months of evenings squeezed against a full-time job. A compact housing with bearings on all six planets <em>and</em> on the output shaft — the kind of detail you can only get right the sixth time.
+        </p>
+        <dl class="specimen__stats mono">
+          <div><dt>ratio</dt><dd>41 : 1</dd></div>
+          <div><dt>planets</dt><dd>6, bearing-supported</dd></div>
+          <div><dt>iterations</dt><dd>6 in fusion 360</dd></div>
+          <div><dt>duration</dt><dd>~2 months</dd></div>
+          <div><dt>fabrication</dt><dd>3d print · pla</dd></div>
+          <div><dt>follow-up</dt><dd>stability test #1 passed · limit switch + home routine on middle joint</dd></div>
+        </dl>
+        <a class="specimen__link mono micro" href="https://x.com/bengabp" target="_blank" rel="noopener">
+          build log on x.com/bengabp &nbsp;↗
+        </a>
+      </div>
+    </article>
+
+    <!-- Specimen grid -->
+    <div class="specimen__grid">
+
+      <article class="spec">
+        <header class="spec__head">
+          <span class="spec__num mono micro">03·B</span>
+          <span class="spec__kind mono micro caps">robotics · in progress</span>
+        </header>
+        <h4 class="spec__title"><span class="serif italic">Robot arm</span></h4>
+        <p class="spec__body">Multi-joint build running off the 41:1 gearbox. Broken joint reprinted at higher infill; middle joint got a limit switch and a home routine. Stability test #1 in the logbook.</p>
+        <div class="spec__tags mono micro">
+          <span>esp32</span><span>steppers</span><span>limit switch</span><span>home routine</span><span>3d print</span>
+        </div>
+      </article>
+
+      <article class="spec">
+        <header class="spec__head">
+          <span class="spec__num mono micro">03·C</span>
+          <span class="spec__kind mono micro caps">mobile · on-device ai</span>
+        </header>
+        <h4 class="spec__title"><span class="serif italic">Dvukh</span> &nbsp;— &nbsp;русский словарь</h4>
+        <p class="spec__body">Offline-first English→Russian learning app. On-device AI generates word pairs; timed drills in the Duolingo tradition. Shipping to myself first — I need it to stick in Moscow.</p>
+        <div class="spec__tags mono micro">
+          <span>flutter</span><span>dart</span><span>on-device llm</span><span>sqlite</span><span>offline-first</span>
+        </div>
+      </article>
+
+      <article class="spec">
+        <header class="spec__head">
+          <span class="spec__num mono micro">03·D</span>
+          <span class="spec__kind mono micro caps">computer vision</span>
+        </header>
+        <h4 class="spec__title"><span class="serif italic">Hand-track</span> interactions</h4>
+        <p class="spec__body">Real-time hand tracking and gesture control on OpenCV. Calibrated for cheap webcams and bad lighting, because that's every webcam and every room.</p>
+        <div class="spec__tags mono micro">
+          <span>opencv</span><span>mediapipe-esque</span><span>python</span><span>real-time</span>
+        </div>
+      </article>
+
+      <article class="spec">
+        <header class="spec__head">
+          <span class="spec__num mono micro">03·E</span>
+          <span class="spec__kind mono micro caps">embedded · sensors</span>
+        </header>
+        <h4 class="spec__title"><span class="serif italic">Bench</span> experiments</h4>
+        <p class="spec__body">ESP32, Arduino Uno/Nano, Raspberry Pi Pico — wired into NFC modules, RTCs, OLEDs, IR sensors, rotary encoders, joysticks, and 7-segment displays. Small things, but they're how software becomes furniture.</p>
+        <div class="spec__tags mono micro">
+          <span>esp32</span><span>arduino</span><span>pi pico</span><span>nfc</span><span>rtc</span><span>oled</span><span>rotary</span><span>7-seg</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ STACK ═══════════════════════ -->
+  <section id="stack" class="section stack reveal">
+    <div class="section__head">
+      <span class="section__num mono">§ 04</span>
+      <h2 class="section__title"><span class="serif italic">Stack</span> manifest.</h2>
+      <span class="section__rule" aria-hidden="true"></span>
+      <p class="section__sub mono micro">not a wishlist · tools i've actually put into production or onto a breadboard.</p>
+    </div>
+
+    <!-- Tech marquee: big icons of the daily-driver stack -->
+    <div class="toolbelt" aria-hidden="true">
+      <div class="toolbelt__track">
+        <div class="tool" data-name="python"><img src="https://cdn.simpleicons.org/python/e9e5dc" alt="" loading="lazy" decoding="async"><span>Python</span></div>
+        <div class="tool" data-name="fastapi"><img src="https://cdn.simpleicons.org/fastapi/e9e5dc" alt="" loading="lazy" decoding="async"><span>FastAPI</span></div>
+        <div class="tool" data-name="kubernetes"><img src="https://cdn.simpleicons.org/kubernetes/e9e5dc" alt="" loading="lazy" decoding="async"><span>Kubernetes</span></div>
+        <div class="tool" data-name="docker"><img src="https://cdn.simpleicons.org/docker/e9e5dc" alt="" loading="lazy" decoding="async"><span>Docker</span></div>
+        <div class="tool" data-name="mongodb"><img src="https://cdn.simpleicons.org/mongodb/e9e5dc" alt="" loading="lazy" decoding="async"><span>MongoDB</span></div>
+        <div class="tool" data-name="redis"><img src="https://cdn.simpleicons.org/redis/e9e5dc" alt="" loading="lazy" decoding="async"><span>Redis</span></div>
+        <div class="tool" data-name="aws"><img src="https://cdn.simpleicons.org/amazonwebservices/e9e5dc" alt="" loading="lazy" decoding="async"><span>AWS</span></div>
+        <div class="tool" data-name="openai"><img src="https://cdn.simpleicons.org/openai/e9e5dc" alt="" loading="lazy" decoding="async"><span>OpenAI</span></div>
+        <div class="tool" data-name="gemini"><img src="https://cdn.simpleicons.org/googlegemini/e9e5dc" alt="" loading="lazy" decoding="async"><span>Gemini</span></div>
+        <div class="tool" data-name="playwright"><img src="https://cdn.simpleicons.org/playwright/e9e5dc" alt="" loading="lazy" decoding="async"><span>Playwright</span></div>
+        <div class="tool" data-name="opencv"><img src="https://cdn.simpleicons.org/opencv/e9e5dc" alt="" loading="lazy" decoding="async"><span>OpenCV</span></div>
+        <div class="tool" data-name="flutter"><img src="https://cdn.simpleicons.org/flutter/e9e5dc" alt="" loading="lazy" decoding="async"><span>Flutter</span></div>
+        <div class="tool" data-name="grafana"><img src="https://cdn.simpleicons.org/grafana/e9e5dc" alt="" loading="lazy" decoding="async"><span>Grafana</span></div>
+        <div class="tool" data-name="linux"><img src="https://cdn.simpleicons.org/linux/e9e5dc" alt="" loading="lazy" decoding="async"><span>Linux</span></div>
+        <div class="tool" data-name="n8n"><img src="https://cdn.simpleicons.org/n8n/e9e5dc" alt="" loading="lazy" decoding="async"><span>n8n</span></div>
+        <div class="tool" data-name="esp32"><img src="https://cdn.simpleicons.org/espressif/e9e5dc" alt="" loading="lazy" decoding="async"><span>ESP32</span></div>
+        <div class="tool" data-name="arduino"><img src="https://cdn.simpleicons.org/arduino/e9e5dc" alt="" loading="lazy" decoding="async"><span>Arduino</span></div>
+        <div class="tool" data-name="pi"><img src="https://cdn.simpleicons.org/raspberrypi/e9e5dc" alt="" loading="lazy" decoding="async"><span>Pi Pico</span></div>
+        <div class="tool" data-name="fusion"><img src="https://cdn.simpleicons.org/autodesk/e9e5dc" alt="" loading="lazy" decoding="async"><span>Fusion 360</span></div>
+        <!-- duplicate for seamless loop -->
+        <div class="tool" data-name="python"><img src="https://cdn.simpleicons.org/python/e9e5dc" alt="" loading="lazy" decoding="async"><span>Python</span></div>
+        <div class="tool" data-name="fastapi"><img src="https://cdn.simpleicons.org/fastapi/e9e5dc" alt="" loading="lazy" decoding="async"><span>FastAPI</span></div>
+        <div class="tool" data-name="kubernetes"><img src="https://cdn.simpleicons.org/kubernetes/e9e5dc" alt="" loading="lazy" decoding="async"><span>Kubernetes</span></div>
+        <div class="tool" data-name="docker"><img src="https://cdn.simpleicons.org/docker/e9e5dc" alt="" loading="lazy" decoding="async"><span>Docker</span></div>
+        <div class="tool" data-name="mongodb"><img src="https://cdn.simpleicons.org/mongodb/e9e5dc" alt="" loading="lazy" decoding="async"><span>MongoDB</span></div>
+        <div class="tool" data-name="redis"><img src="https://cdn.simpleicons.org/redis/e9e5dc" alt="" loading="lazy" decoding="async"><span>Redis</span></div>
+        <div class="tool" data-name="aws"><img src="https://cdn.simpleicons.org/amazonwebservices/e9e5dc" alt="" loading="lazy" decoding="async"><span>AWS</span></div>
+        <div class="tool" data-name="openai"><img src="https://cdn.simpleicons.org/openai/e9e5dc" alt="" loading="lazy" decoding="async"><span>OpenAI</span></div>
+        <div class="tool" data-name="gemini"><img src="https://cdn.simpleicons.org/googlegemini/e9e5dc" alt="" loading="lazy" decoding="async"><span>Gemini</span></div>
+        <div class="tool" data-name="playwright"><img src="https://cdn.simpleicons.org/playwright/e9e5dc" alt="" loading="lazy" decoding="async"><span>Playwright</span></div>
+        <div class="tool" data-name="opencv"><img src="https://cdn.simpleicons.org/opencv/e9e5dc" alt="" loading="lazy" decoding="async"><span>OpenCV</span></div>
+        <div class="tool" data-name="flutter"><img src="https://cdn.simpleicons.org/flutter/e9e5dc" alt="" loading="lazy" decoding="async"><span>Flutter</span></div>
+        <div class="tool" data-name="grafana"><img src="https://cdn.simpleicons.org/grafana/e9e5dc" alt="" loading="lazy" decoding="async"><span>Grafana</span></div>
+        <div class="tool" data-name="linux"><img src="https://cdn.simpleicons.org/linux/e9e5dc" alt="" loading="lazy" decoding="async"><span>Linux</span></div>
+        <div class="tool" data-name="n8n"><img src="https://cdn.simpleicons.org/n8n/e9e5dc" alt="" loading="lazy" decoding="async"><span>n8n</span></div>
+        <div class="tool" data-name="esp32"><img src="https://cdn.simpleicons.org/espressif/e9e5dc" alt="" loading="lazy" decoding="async"><span>ESP32</span></div>
+        <div class="tool" data-name="arduino"><img src="https://cdn.simpleicons.org/arduino/e9e5dc" alt="" loading="lazy" decoding="async"><span>Arduino</span></div>
+        <div class="tool" data-name="pi"><img src="https://cdn.simpleicons.org/raspberrypi/e9e5dc" alt="" loading="lazy" decoding="async"><span>Pi Pico</span></div>
+        <div class="tool" data-name="fusion"><img src="https://cdn.simpleicons.org/autodesk/e9e5dc" alt="" loading="lazy" decoding="async"><span>Fusion 360</span></div>
+      </div>
+    </div>
+
+    <div class="stack__grid">
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> languages</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/python/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">Python</span><span class="stack__note mono micro">primary · 5 yrs</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/postgresql/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">SQL</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/dart/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Dart</span><span class="stack__note mono micro">flutter</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/javascript/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">JavaScript</span><span class="stack__note mono micro">working</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/cplusplus/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">C/C++</span><span class="stack__note mono micro">arduino-side</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> backend &amp; data</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/fastapi/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">FastAPI</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/flask/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Flask</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/django/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Django</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/pydantic/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Pydantic</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/playwright/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Playwright</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/selenium/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Selenium</span></li>
+          <li><span class="chip">asyncio</span></li>
+          <li><span class="chip">message queues</span></li>
+          <li><span class="chip">vector stores</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> data stores</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/mongodb/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">MongoDB</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/redis/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Redis</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/postgresql/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">PostgreSQL</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/sqlite/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">SQLite</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> cloud &amp; infra</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/kubernetes/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">Kubernetes</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/docker/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Docker</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/amazonwebservices/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">AWS</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/digitalocean/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">DigitalOcean</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/grafana/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Grafana</span></li>
+          <li><span class="chip">Logfire</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/n8n/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">n8n</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/linux/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Linux · CLI</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> ai · ml · agents</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary">LLM agents</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/googlegemini/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Gemini 2.5 Pro</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/openai/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">OpenAI · o3-mini</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/openai/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Whisper</span></li>
+          <li><span class="chip">LightRAG</span></li>
+          <li><span class="chip">on-device LLM</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> computer vision</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/opencv/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">OpenCV</span></li>
+          <li><span class="chip">hand tracking</span></li>
+          <li><span class="chip">real-time pipelines</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> mobile</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/flutter/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">Flutter</span></li>
+          <li><span class="chip">offline-first</span></li>
+          <li><span class="chip">on-device inference</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> hardware · embedded</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/espressif/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">ESP32</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/arduino/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Arduino Uno/Nano</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/raspberrypi/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Raspberry Pi Pico</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/autodesk/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">Fusion 360</span></li>
+          <li><span class="chip">3D printing</span></li>
+          <li><span class="chip">NFC · RTC · OLED</span></li>
+          <li><span class="chip">stepper · encoder</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> mobile automation</div>
+        <ul class="stack__list">
+          <li><span class="chip chip--primary"><img class="chip__ico" src="https://cdn.simpleicons.org/android/ff6b2b" alt="" loading="lazy" decoding="async" width="12" height="12">uiautomator2</span></li>
+          <li><span class="chip"><img class="chip__ico" src="https://cdn.simpleicons.org/android/8a8684" alt="" loading="lazy" decoding="async" width="12" height="12">adb</span></li>
+          <li><span class="chip">phone farms</span></li>
+          <li><span class="chip">anti-bot bypass</span></li>
+        </ul>
+      </div>
+
+      <div class="stack__card stack__card--soft">
+        <div class="stack__head mono micro caps"><span class="amber">//</span> non-engineering</div>
+        <ul class="stack__list">
+          <li><span class="chip">team building</span></li>
+          <li><span class="chip">project management</span></li>
+          <li><span class="chip">technical hiring</span></li>
+          <li><span class="chip">teaching</span></li>
+          <li><span class="chip">R&amp;D</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ REPOS ═══════════════════════ -->
+  <section id="repos" class="section repos reveal">
+    <div class="section__head">
+      <span class="section__num mono">§ 05</span>
+      <h2 class="section__title"><span class="serif italic">Open</span> repositories.</h2>
+      <span class="section__rule" aria-hidden="true"></span>
+      <p class="section__sub mono micro">github · <a href="https://github.com/bengabp" target="_blank" rel="noopener" class="subtle-link">@bengabp</a> · 43 public · 98 stars · member of @Infignity.</p>
+    </div>
+
+    <ul class="repo__grid">
+      <li class="repo">
+        <a href="https://github.com/bengabp/xclient" target="_blank" rel="noopener">
+          <div class="repo__head"><span class="repo__name">xclient</span><span class="repo__lang mono micro">· python</span></div>
+          <p class="repo__desc">A better fork of twitter-api-client.</p>
+          <div class="repo__foot mono micro"><span>★ 1</span><span class="dim">pinned</span></div>
+        </a>
+      </li>
+
+      <li class="repo repo--accent">
+        <a href="https://github.com/bengabp/dexscreener" target="_blank" rel="noopener">
+          <div class="repo__head"><span class="repo__name">dexscreener</span><span class="repo__lang mono micro">· js</span></div>
+          <p class="repo__desc">Decrypting dexscreener avro data — reverse-engineered the wire format so you can actually work with it.</p>
+          <div class="repo__foot mono micro"><span class="amber">★ 25</span><span>7 forks</span><span class="dim">pinned</span></div>
+        </a>
+      </li>
+
+      <li class="repo">
+        <a href="https://github.com/bengabp/warmai" target="_blank" rel="noopener">
+          <div class="repo__head"><span class="repo__name">warmai</span><span class="repo__lang mono micro">· typescript</span></div>
+          <p class="repo__desc">Open-source mailserver warmer. Send patterns, gradual ramps, reputation-aware schedules.</p>
+          <div class="repo__foot mono micro"><span>★ —</span><span class="dim">pinned</span></div>
+        </a>
+      </li>
+
+      <li class="repo">
+        <a href="https://github.com/bengabp/m3dlp" target="_blank" rel="noopener">
+          <div class="repo__head"><span class="repo__name">m3dlp</span><span class="repo__lang mono micro">· python</span></div>
+          <p class="repo__desc">A yt-dlp-inspired media downloader. Built for the formats yt-dlp couldn't reach cleanly.</p>
+          <div class="repo__foot mono micro"><span>★ —</span><span class="dim">pinned</span></div>
+        </a>
+      </li>
+
+      <li class="repo">
+        <a href="https://github.com/bengabp/holesky-token" target="_blank" rel="noopener">
+          <div class="repo__head"><span class="repo__name">holesky-token</span><span class="repo__lang mono micro">· js · solidity</span></div>
+          <p class="repo__desc">One-command deploy of a token on the Holesky testnet. Testing only — don't point it at mainnet.</p>
+          <div class="repo__foot mono micro"><span>★ 1</span><span class="dim">pinned</span></div>
+        </a>
+      </li>
+
+      <li class="repo repo--more">
+        <a href="https://github.com/bengabp?tab=repositories" target="_blank" rel="noopener">
+          <div class="repo__head"><span class="repo__name serif italic">+ 38 more</span></div>
+          <p class="repo__desc">Experiments, forks, shelved prototypes. Browse the shelf.</p>
+          <div class="repo__foot mono micro"><span class="amber">→ github.com/bengabp</span></div>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Achievements -->
+    <div class="repos__ribbon mono micro">
+      <span class="ribbon__label caps">achievements</span>
+      <span class="ribbon__item">Pair Extraordinaire <sup>×4</sup></span>
+      <span class="ribbon__item">Pull Shark <sup>×3</sup></span>
+      <span class="ribbon__item">Starstruck</span>
+      <span class="ribbon__item">YOLO</span>
+      <span class="ribbon__item">Quickdraw</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ EDU & INTERESTS ═══════════════════════ -->
+  <section class="section edu reveal">
+    <div class="section__head">
+      <span class="section__num mono">§ 06</span>
+      <h2 class="section__title"><span class="serif italic">Currently</span> learning.</h2>
+      <span class="section__rule" aria-hidden="true"></span>
+    </div>
+
+    <div class="edu__grid">
+      <article class="edu__card edu__card--primary">
+        <div class="edu__kicker mono micro caps">education · in progress</div>
+        <h3 class="edu__title"><span class="serif italic">Moscow Polytechnic</span></h3>
+        <p class="edu__meta mono micro">Russian preparatory course · 2026 intake</p>
+        <p class="edu__body">Enrolled, offer in hand, priглашение pending. Once it arrives, I relocate to Moscow and move the dayshift to UTC+03. The work ships either way.</p>
+      </article>
+
+      <article class="edu__card">
+        <div class="edu__kicker mono micro caps">language</div>
+        <h3 class="edu__title"><span class="serif italic">Русский</span></h3>
+        <p class="edu__meta mono micro">grammar · word formation · everyday dialogue</p>
+        <p class="edu__body">Currently around A2. Reading Cyrillic fluently, writing slowly, speaking whenever I can embarrass myself doing it.</p>
+      </article>
+
+      <article class="edu__card">
+        <div class="edu__kicker mono micro caps">self-study</div>
+        <h3 class="edu__title"><span class="serif italic">Mathematics</span></h3>
+        <p class="edu__meta mono micro">structured, from the ground up</p>
+        <p class="edu__body">Reasoning about gears, motor torque, and trajectory planning keeps pulling me back to the math. So I'm building it, properly, on purpose.</p>
+      </article>
+
+      <article class="edu__card">
+        <div class="edu__kicker mono micro caps">craft</div>
+        <h3 class="edu__title"><span class="serif italic">Robotics</span></h3>
+        <p class="edu__meta mono micro">embedded systems · mechanical design</p>
+        <p class="edu__body">Fusion 360, the print bed, the soldering iron, firmware. The feedback loop is slower than software — which is exactly why it's good for me.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ CONTACT ═══════════════════════ -->
+  <footer id="contact" class="foot reveal">
+    <div class="foot__top">
+      <div class="foot__head mono micro caps">
+        <span>§ 07</span>
+        <span class="dim">— end of transmission</span>
+      </div>
+      <h2 class="foot__title">
+        <span class="serif italic">Let's</span> build<br>
+        <span class="serif italic">something</span> that <span class="underline-ink">runs.</span>
+      </h2>
+      <p class="foot__lede">
+        Taking on remote roles, contracting, and serious side-projects. Fast to reply. Faster if you lead with the hard part.
+      </p>
+    </div>
+
+    <div class="foot__grid">
+      <a class="foot__channel" href="mailto:bengabdev4@gmail.com">
+        <div class="ch__label mono micro caps">email · primary</div>
+        <div class="ch__value">bengabdev4<span class="dim">@</span>gmail.com</div>
+        <div class="ch__arrow" aria-hidden="true">↗</div>
+      </a>
+      <a class="foot__channel" href="tel:+2348165094589">
+        <div class="ch__label mono micro caps">phone</div>
+        <div class="ch__value">+234 <span class="dim">816</span> 509 4589</div>
+        <div class="ch__arrow" aria-hidden="true">↗</div>
+      </a>
+      <a class="foot__channel" href="https://github.com/bengabp" target="_blank" rel="noopener">
+        <div class="ch__label mono micro caps">github</div>
+        <div class="ch__value">@bengabp</div>
+        <div class="ch__arrow" aria-hidden="true">↗</div>
+      </a>
+      <a class="foot__channel" href="https://x.com/bengabp" target="_blank" rel="noopener">
+        <div class="ch__label mono micro caps">x · twitter</div>
+        <div class="ch__value">@bengabp <span class="dim">· build log</span></div>
+        <div class="ch__arrow" aria-hidden="true">↗</div>
+      </a>
+      <a class="foot__channel" href="https://linkedin.com/in/bengabp" target="_blank" rel="noopener">
+        <div class="ch__label mono micro caps">linkedin</div>
+        <div class="ch__value">in/bengabp</div>
+        <div class="ch__arrow" aria-hidden="true">↗</div>
+      </a>
+      <div class="foot__channel foot__channel--static">
+        <div class="ch__label mono micro caps">base</div>
+        <div class="ch__value">Lagos <span class="dim">→</span> Moscow</div>
+        <div class="ch__arrow dim" aria-hidden="true">⌖</div>
+      </div>
+    </div>
+
+    <div class="foot__bottom mono micro">
+      <span>© 2026 Benedict Onyebuchi / BEN·01</span>
+      <span class="dim">— designed &amp; built by hand, no template. OLED-safe. 60fps. built in /Users/ben/Documents/IT/personal.</span>
+      <span class="foot__sign"><span class="blip"></span> end of signal</span>
+    </div>
+  </footer>
+
+</main>
+
+<script src="script.js" defer></script>
+</body>
+</html>
