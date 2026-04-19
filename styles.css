@@ -139,6 +139,15 @@ em { font-style: italic; color: var(--chalk); }
   will-change: background;
 }
 
+/* reactive background glyph field — sits behind all content */
+.doodles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
 .scanline {
   position: fixed;
   inset: 0;

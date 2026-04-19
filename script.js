@@ -150,6 +150,114 @@
     sectionTargets.forEach(t => navIO.observe(t));
   }
 
+  /* ─── reactive background glyph field ─── */
+  if (!reduceMotion) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'doodles';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.prepend(canvas);
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const glyphs = ['·', '·', '·', '·', '·', '·', '+', '+', '○', '×', '◦', '∙'];
+
+    let w = 0, h = 0;
+    let points = [];
+    let mx = -9999, my = -9999;
+    let lastPointer = 0;
+
+    const resize = () => {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width  = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width  = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildGrid();
+    };
+
+    const buildGrid = () => {
+      points = [];
+      const step = 76;
+      let row = 0;
+      for (let y = step * 0.5; y < h + step; y += step, row++) {
+        const offset = row % 2 ? step * 0.5 : 0;
+        for (let x = step * 0.5 + offset; x < w + step; x += step) {
+          points.push({
+            hx: x, hy: y, x, y,
+            g: glyphs[Math.floor(Math.random() * glyphs.length)],
+            phase: Math.random() * Math.PI * 2,
+            spd:   0.6 + Math.random() * 0.8,
+          });
+        }
+      }
+    };
+
+    const tick = (t) => {
+      if (document.hidden) { requestAnimationFrame(tick); return; }
+      ctx.clearRect(0, 0, w, h);
+      ctx.font = '10px "JetBrains Mono", ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const hasCursor = (performance.now() - lastPointer) < 4000;
+      const R  = 180;
+      const R2 = R * R;
+
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        const dx = mx - p.hx;
+        const dy = my - p.hy;
+        const d2 = dx * dx + dy * dy;
+        const fade = (hasCursor && d2 < R2) ? (1 - Math.sqrt(d2) / R) : 0;
+
+        // magnetic lean toward cursor
+        const pull = fade * 0.32;
+        p.x = p.hx + dx * pull;
+        p.y = p.hy + dy * pull;
+
+        // ambient breathing pulse
+        const pulse = 0.5 + 0.5 * Math.sin(t * 0.0007 * p.spd + p.phase);
+        const base  = 0.028 + pulse * 0.028;        // ~0.03–0.06
+        const alpha = base + fade * 0.7;
+
+        if (fade > 0.22) {
+          ctx.fillStyle = `rgba(255, 107, 43, ${alpha})`;
+        } else {
+          ctx.fillStyle = `rgba(138, 134, 132, ${alpha})`;
+        }
+        ctx.fillText(p.g, p.x, p.y);
+      }
+
+      // small amber ring sweeping outward from cursor, always-on trace
+      if (hasCursor) {
+        const ringR = 26 + ((t * 0.08) % 48);
+        const ringA = Math.max(0, 0.18 - (ringR - 26) / 48 * 0.18);
+        ctx.strokeStyle = `rgba(255, 107, 43, ${ringA})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(mx, my, ringR, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(tick);
+    };
+
+    resize();
+    requestAnimationFrame(tick);
+
+    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('pointermove', (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      lastPointer = performance.now();
+    }, { passive: true });
+    window.addEventListener('pointerleave', () => {
+      mx = my = -9999;
+    });
+  }
+
   /* ─── keyboard nav shortcut: g then h/l/s/r/c ─── */
   let gMode = false, gTimer = 0;
   const shortcutMap = {
