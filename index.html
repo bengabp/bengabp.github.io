@@ -675,8 +675,8 @@
 
     <div class="langs__grid">
 
-      <article class="lang-card">
-        <header class="lang-card__head">
+      <article class="lang-card" data-level="C2">
+        <div class="lang-card__top">
           <div class="flag flag--gb" role="img" aria-label="Flag of the United Kingdom">
             <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
               <clipPath id="gb-s"><path d="M0,0 v30 h60 V0 z"/></clipPath>
@@ -690,26 +690,23 @@
               </g>
             </svg>
           </div>
-          <div class="lang-card__title-wrap">
-            <h3 class="lang-card__title"><span class="serif">English</span></h3>
-            <p class="lang-card__sub mono micro">british · working language</p>
-          </div>
-        </header>
-
-        <div class="cefr" aria-label="CEFR level: C2">
-          <span class="cefr__slot is-filled">A1</span>
-          <span class="cefr__slot is-filled">A2</span>
-          <span class="cefr__slot is-filled">B1</span>
-          <span class="cefr__slot is-filled">B2</span>
-          <span class="cefr__slot is-filled">C1</span>
-          <span class="cefr__slot is-filled is-current">C2</span>
+          <span class="lang-card__badge mono">C2</span>
         </div>
-
-        <p class="lang-card__level mono"><span class="amber">C2</span> · <em class="serif">proficient</em> — writing, reading, speaking, thinking.</p>
+        <h3 class="lang-card__title"><span class="serif">English</span></h3>
+        <p class="lang-card__sub mono micro">british · working</p>
+        <div class="cefr cefr--compact" aria-label="CEFR level: C2">
+          <span class="is-filled" title="A1"></span>
+          <span class="is-filled" title="A2"></span>
+          <span class="is-filled" title="B1"></span>
+          <span class="is-filled" title="B2"></span>
+          <span class="is-filled" title="C1"></span>
+          <span class="is-filled is-current" title="C2"></span>
+        </div>
+        <p class="lang-card__note mono micro"><em class="serif">proficient</em></p>
       </article>
 
-      <article class="lang-card">
-        <header class="lang-card__head">
+      <article class="lang-card" data-level="A2">
+        <div class="lang-card__top">
           <div class="flag flag--ru" role="img" aria-label="Flag of Russia">
             <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
               <rect width="60" height="10" y="0"  fill="#ffffff"/>
@@ -717,22 +714,38 @@
               <rect width="60" height="10" y="20" fill="#D52B1E"/>
             </svg>
           </div>
-          <div class="lang-card__title-wrap">
-            <h3 class="lang-card__title"><span class="serif">Русский</span></h3>
-            <p class="lang-card__sub mono micro">russian · preparatory course at moscow polytechnic</p>
-          </div>
-        </header>
-
-        <div class="cefr" aria-label="CEFR level: A2">
-          <span class="cefr__slot is-filled">A1</span>
-          <span class="cefr__slot is-filled is-current">A2</span>
-          <span class="cefr__slot">B1</span>
-          <span class="cefr__slot">B2</span>
-          <span class="cefr__slot">C1</span>
-          <span class="cefr__slot">C2</span>
+          <span class="lang-card__badge mono">A2</span>
         </div>
+        <h3 class="lang-card__title"><span class="serif">Русский</span></h3>
+        <p class="lang-card__sub mono micro">russian · preparatory</p>
+        <div class="cefr cefr--compact" aria-label="CEFR level: A2">
+          <span class="is-filled" title="A1"></span>
+          <span class="is-filled is-current" title="A2"></span>
+          <span title="B1"></span>
+          <span title="B2"></span>
+          <span title="C1"></span>
+          <span title="C2"></span>
+        </div>
+        <p class="lang-card__note mono micro"><em class="serif">elementary</em>, climbing</p>
+      </article>
 
-        <p class="lang-card__level mono"><span class="amber">A2</span> · <em class="serif">elementary</em> — reading Cyrillic fluently, speaking on purpose, writing slowly.</p>
+      <!-- planned / empty slot — template for future additions -->
+      <article class="lang-card lang-card--planned" aria-label="Slot for a future language">
+        <div class="lang-card__top">
+          <div class="flag flag--ghost" aria-hidden="true">
+            <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+              <rect width="60" height="30" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3"/>
+              <text x="30" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="currentColor" opacity="0.7">+</text>
+            </svg>
+          </div>
+          <span class="lang-card__badge mono dim">—</span>
+        </div>
+        <h3 class="lang-card__title"><span class="serif italic dim">next.</span></h3>
+        <p class="lang-card__sub mono micro">to be scheduled</p>
+        <div class="cefr cefr--compact" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <p class="lang-card__note mono micro dim">reserved</p>
       </article>
 
     </div>
