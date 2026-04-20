@@ -150,8 +150,10 @@
     sectionTargets.forEach(t => navIO.observe(t));
   }
 
-  /* ─── reactive background: circuit substrate + glyph field ─── */
-  if (!reduceMotion) {
+  /* ─── ambient background: hairline topo lines with scroll-parallax ───
+     Skipped on narrow viewports (<900px) and under reduced-motion. */
+  const desktop = window.matchMedia('(min-width: 900px)').matches;
+  if (!reduceMotion && desktop) {
     const canvas = document.createElement('canvas');
     canvas.className = 'doodles';
     canvas.setAttribute('aria-hidden', 'true');
@@ -159,16 +161,34 @@
 
     const ctx = canvas.getContext('2d', { alpha: true });
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const glyphs = ['·', '·', '·', '·', '·', '·', '+', '+', '○', '×', '◦', '∙'];
+    const rand = (a, b) => a + Math.random() * (b - a);
 
     let w = 0, h = 0;
-    let points = [];     // glyph grid
-    let arms   = [];     // articulated robot arms with end-effector trails
-    let gears  = [];     // tiny rotating gears in corners
-    let mx = -9999, my = -9999;
+    let lines = [];
+    let scrollY = window.scrollY;
+    let mx = -9999;
     let lastPointer = 0;
 
-    const rand = (a, b) => a + Math.random() * (b - a);
+    const buildLines = () => {
+      lines = [];
+      const count = 7;
+      const margin = h * 0.08;
+      const step = (h - margin * 2) / (count - 1);
+      for (let i = 0; i < count; i++) {
+        lines.push({
+          y:      margin + i * step,
+          amp1:   rand(16, 40),
+          freq1:  rand(0.0028, 0.0055),
+          phase1: rand(0, Math.PI * 2),
+          amp2:   rand(5, 14),
+          freq2:  rand(0.011, 0.019),
+          phase2: rand(0, Math.PI * 2),
+          drift:  rand(0.035, 0.09),          // horizontal drift speed
+          parallax: rand(0.10, 0.28),         // vertical scroll factor
+          brightness: rand(0.07, 0.14),       // base alpha
+        });
+      }
+    };
 
     const resize = () => {
       w = window.innerWidth;
@@ -178,271 +198,71 @@
       canvas.style.width  = w + 'px';
       canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      buildGrid();
-      buildArms();
-      buildGears();
+      buildLines();
     };
 
-    /* ── glyph grid ── */
-    const buildGrid = () => {
-      points = [];
-      const step = 76;
-      let row = 0;
-      for (let y = step * 0.5; y < h + step; y += step, row++) {
-        const offset = row % 2 ? step * 0.5 : 0;
-        for (let x = step * 0.5 + offset; x < w + step; x += step) {
-          points.push({
-            hx: x, hy: y, x, y,
-            g: glyphs[Math.floor(Math.random() * glyphs.length)],
-            phase: Math.random() * Math.PI * 2,
-            spd:   0.6 + Math.random() * 0.8,
-          });
-        }
-      }
-    };
-
-    /* ── articulated robot arms (multi-joint, oscillating) ── */
-    const buildArms = () => {
-      // Each arm anchors to a viewport edge, out of the main reading path.
-      // Links define length + motion profile: base angle, oscillation amplitude,
-      // angular frequency, and phase. The first link's baseAngle points the arm
-      // inward from the edge.
-      const common = () => ({
-        freq:  rand(0.00018, 0.00032),
-        phase: rand(0, Math.PI * 2),
-      });
-
-      arms = [
-        // Left edge, upper-third
-        { base: [-20, h * 0.22], trail: [], links: [
-            { length: Math.min(260, w * 0.22), baseAngle: 0.15,           amp: 0.55, ...common() },
-            { length: Math.min(190, w * 0.17), baseAngle: -0.4,           amp: 0.95, ...common() },
-            { length: Math.min(120, w * 0.10), baseAngle: 0.3,            amp: 1.2,  ...common() },
-        ]},
-        // Right edge, middle
-        { base: [w + 20, h * 0.55], trail: [], links: [
-            { length: Math.min(280, w * 0.24), baseAngle: Math.PI - 0.2,  amp: 0.6,  ...common() },
-            { length: Math.min(210, w * 0.18), baseAngle: 0.5,            amp: 1.0,  ...common() },
-            { length: Math.min(130, w * 0.11), baseAngle: -0.35,          amp: 1.1,  ...common() },
-        ]},
-        // Bottom-left
-        { base: [w * 0.12, h + 20], trail: [], links: [
-            { length: Math.min(220, h * 0.26), baseAngle: -Math.PI / 2 + 0.1, amp: 0.45, ...common() },
-            { length: Math.min(170, h * 0.20), baseAngle: -0.5,              amp: 1.1,  ...common() },
-        ]},
-        // Top, slightly right of center
-        { base: [w * 0.68, -20], trail: [], links: [
-            { length: Math.min(230, h * 0.26), baseAngle: Math.PI / 2 - 0.1, amp: 0.5,  ...common() },
-            { length: Math.min(170, h * 0.20), baseAngle: 0.6,               amp: 1.05, ...common() },
-            { length: Math.min(110, h * 0.12), baseAngle: -0.3,              amp: 1.25, ...common() },
-        ]},
-      ];
-    };
-
-    const updateArm = (arm, t) => {
-      let x = arm.base[0];
-      let y = arm.base[1];
-      let acc = 0;
-      const joints = [[x, y]];
-      for (const L of arm.links) {
-        const ang = L.baseAngle + Math.sin(t * L.freq + L.phase) * L.amp;
-        acc += ang;
-        x += Math.cos(acc) * L.length;
-        y += Math.sin(acc) * L.length;
-        joints.push([x, y]);
-      }
-      // append end-effector to trail (throttle: only every ~30ms)
-      const last = arm.trail[arm.trail.length - 1];
-      if (!last || t - last.t > 35) {
-        arm.trail.push({ x, y, t });
-        if (arm.trail.length > 90) arm.trail.shift();
-      }
-      // drop old trail points
-      while (arm.trail.length && t - arm.trail[0].t > 4500) arm.trail.shift();
-      return joints;
-    };
-
-    const drawArm = (arm, t) => {
-      const joints = updateArm(arm, t);
-
-      // end-effector trail (fades with age)
-      ctx.lineCap = 'round';
-      ctx.lineWidth = 1.2;
-      for (let i = 1; i < arm.trail.length; i++) {
-        const p0 = arm.trail[i - 1];
-        const p1 = arm.trail[i];
-        const age = t - p1.t;
-        const a = Math.max(0, 1 - age / 4500) * 0.45;
-        ctx.strokeStyle = `rgba(255,107,43,${a.toFixed(3)})`;
-        ctx.beginPath();
-        ctx.moveTo(p0.x, p0.y);
-        ctx.lineTo(p1.x, p1.y);
-        ctx.stroke();
-      }
-
-      // arm links
-      ctx.strokeStyle = 'rgba(138,134,132,0.42)';
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      for (let i = 0; i < joints.length; i++) {
-        const [x, y] = joints[i];
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // parallel inner "structural" line offset slightly — gives the link a
-      // mechanical silhouette instead of a single hairline.
-      ctx.strokeStyle = 'rgba(138,134,132,0.14)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      for (let i = 0; i < joints.length; i++) {
-        const [x, y] = joints[i];
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // joints
-      for (let i = 0; i < joints.length; i++) {
-        const [x, y] = joints[i];
-        if (i === 0) {
-          // base mount: small square, amber dot
-          ctx.strokeStyle = 'rgba(138,134,132,0.55)';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(x - 6, y - 6, 12, 12);
-          ctx.fillStyle = 'rgba(255,107,43,0.6)';
-          ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
-        } else if (i === joints.length - 1) {
-          // end-effector: amber target
-          ctx.fillStyle = 'rgba(255,107,43,0.85)';
-          ctx.beginPath(); ctx.arc(x, y, 3.6, 0, Math.PI * 2); ctx.fill();
-          ctx.strokeStyle = 'rgba(255,107,43,0.5)';
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.stroke();
-          // tick marks
-          ctx.strokeStyle = 'rgba(255,107,43,0.6)';
-          ctx.beginPath();
-          ctx.moveTo(x - 13, y); ctx.lineTo(x - 10, y);
-          ctx.moveTo(x + 10, y); ctx.lineTo(x + 13, y);
-          ctx.moveTo(x, y - 13); ctx.lineTo(x, y - 10);
-          ctx.moveTo(x, y + 10); ctx.lineTo(x, y + 13);
-          ctx.stroke();
-        } else {
-          // intermediate joint: solid black center, hairline ring
-          ctx.fillStyle = 'rgba(0,0,0,1)';
-          ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill();
-          ctx.strokeStyle = 'rgba(138,134,132,0.7)';
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.stroke();
-          ctx.fillStyle = 'rgba(255,107,43,0.45)';
-          ctx.beginPath(); ctx.arc(x, y, 1.4, 0, Math.PI * 2); ctx.fill();
-        }
-      }
-    };
-
-    /* ── corner gears ── */
-    const buildGears = () => {
-      gears = [
-        { cx: 56,     cy: 56,     r: 26, teeth: 14, dir:  1, speed: 0.010 },
-        { cx: w - 56, cy: h - 56, r: 34, teeth: 18, dir: -1, speed: 0.008 },
-      ];
-    };
-
-    const drawGear = (g, t) => {
-      const rot = t * g.speed * g.dir;
-      ctx.save();
-      ctx.translate(g.cx, g.cy);
-      ctx.rotate(rot);
-      ctx.strokeStyle = 'rgba(138,134,132,0.18)';
-      ctx.lineWidth = 1;
-      // inner & outer circles
-      ctx.beginPath(); ctx.arc(0, 0, g.r, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, 0, g.r - 6, 0, Math.PI * 2); ctx.stroke();
-      // teeth
-      for (let i = 0; i < g.teeth; i++) {
-        const a = (Math.PI * 2 / g.teeth) * i;
-        const x1 = Math.cos(a) * g.r;
-        const y1 = Math.sin(a) * g.r;
-        const x2 = Math.cos(a) * (g.r + 4);
-        const y2 = Math.sin(a) * (g.r + 4);
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }
-      // hub
-      ctx.fillStyle = 'rgba(255,107,43,0.28)';
-      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.fill();
-      // registration mark
-      ctx.strokeStyle = 'rgba(255,107,43,0.35)';
-      ctx.beginPath(); ctx.moveTo(0, -g.r); ctx.lineTo(0, -g.r + 5); ctx.stroke();
-      ctx.restore();
-    };
-
-    /* ── main draw loop ── */
     const tick = (t) => {
       if (document.hidden) { requestAnimationFrame(tick); return; }
       ctx.clearRect(0, 0, w, h);
-
-      const hasCursor = (performance.now() - lastPointer) < 4000;
-
-      // --- LAYER 1: corner gears
-      for (const g of gears) drawGear(g, t);
-
-      // --- LAYER 2: articulated robot arms
-      ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
-      for (const arm of arms) drawArm(arm, t);
+      ctx.lineJoin = 'round';
 
-      // --- LAYER 3: glyph field
-      ctx.font = '10px "JetBrains Mono", ui-monospace, monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+      const hasCursor = (performance.now() - lastPointer) < 3000;
 
-      const R  = 180;
-      const R2 = R * R;
+      for (const L of lines) {
+        const yOffset = -scrollY * L.parallax;
+        const driftX  = t * L.drift;
+        // wrap vertically so lines stay on screen while still responding to scroll
+        let baseY = L.y + yOffset;
+        baseY = ((baseY % h) + h) % h;
 
-      for (let i = 0; i < points.length; i++) {
-        const p = points[i];
-        const dx = mx - p.hx;
-        const dy = my - p.hy;
-        const d2 = dx * dx + dy * dy;
-        const fade = (hasCursor && d2 < R2) ? (1 - Math.sqrt(d2) / R) : 0;
-
-        const pull = fade * 0.32;
-        p.x = p.hx + dx * pull;
-        p.y = p.hy + dy * pull;
-
-        const pulse = 0.5 + 0.5 * Math.sin(t * 0.0007 * p.spd + p.phase);
-        const base  = 0.028 + pulse * 0.028;
-        const alpha = base + fade * 0.7;
-
-        if (fade > 0.22) {
-          ctx.fillStyle = `rgba(255, 107, 43, ${alpha})`;
-        } else {
-          ctx.fillStyle = `rgba(138, 134, 132, ${alpha})`;
+        // pre-compute a sampled path; we also hunt for the segment nearest
+        // the cursor X to draw a small amber highlight there.
+        const step = 4;
+        let amberSegAt = -1;
+        let bestDx = 120;
+        if (hasCursor) {
+          for (let x = 0; x < w; x += step) {
+            const dx = Math.abs(x - mx);
+            if (dx < bestDx) { bestDx = dx; amberSegAt = x; }
+          }
         }
-        ctx.fillText(p.g, p.x, p.y);
-      }
 
-      // --- LAYER 4: cursor ring trace
-      if (hasCursor) {
-        const ringR = 26 + ((t * 0.08) % 48);
-        const ringA = Math.max(0, 0.18 - (ringR - 26) / 48 * 0.18);
-        ctx.strokeStyle = `rgba(255, 107, 43, ${ringA})`;
+        // base trace
+        ctx.strokeStyle = `rgba(138,134,132,${L.brightness.toFixed(3)})`;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(mx, my, ringR, 0, Math.PI * 2);
+        for (let x = -20; x <= w + 20; x += step) {
+          const y = baseY
+            + Math.sin((x + driftX)        * L.freq1 + L.phase1) * L.amp1
+            + Math.sin((x + driftX * 1.7)  * L.freq2 + L.phase2) * L.amp2;
+          if (x === -20) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
         ctx.stroke();
 
-        // small crosshair — servo targeting style
-        ctx.strokeStyle = 'rgba(255, 107, 43, 0.4)';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(mx - 14, my); ctx.lineTo(mx - 6, my);
-        ctx.moveTo(mx + 6,  my); ctx.lineTo(mx + 14, my);
-        ctx.moveTo(mx, my - 14); ctx.lineTo(mx, my - 6);
-        ctx.moveTo(mx, my + 6);  ctx.lineTo(mx, my + 14);
-        ctx.stroke();
+        // tiny amber highlight near cursor X (only on the nearest couple of lines)
+        if (amberSegAt >= 0 && Math.abs(L.y - window.innerHeight * 0.5) < h * 0.85) {
+          const segHalf = 60;
+          ctx.strokeStyle = 'rgba(255,107,43,0.55)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          for (let x = amberSegAt - segHalf; x <= amberSegAt + segHalf; x += 3) {
+            const y = baseY
+              + Math.sin((x + driftX)       * L.freq1 + L.phase1) * L.amp1
+              + Math.sin((x + driftX * 1.7) * L.freq2 + L.phase2) * L.amp2;
+            const distFromCenter = Math.abs(x - amberSegAt) / segHalf;
+            const alpha = (1 - distFromCenter) * 0.55;
+            if (x === amberSegAt - segHalf) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.strokeStyle = `rgba(255,107,43,${alpha.toFixed(3)})`;
+              ctx.lineTo(x, y);
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(x, y);
+            }
+          }
+        }
       }
 
       requestAnimationFrame(tick);
@@ -452,14 +272,14 @@
     requestAnimationFrame(tick);
 
     window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('scroll', () => {
+      scrollY = window.scrollY;
+    }, { passive: true });
     window.addEventListener('pointermove', (e) => {
       mx = e.clientX;
-      my = e.clientY;
       lastPointer = performance.now();
     }, { passive: true });
-    window.addEventListener('pointerleave', () => {
-      mx = my = -9999;
-    });
+    window.addEventListener('pointerleave', () => { mx = -9999; });
   }
 
   /* ─── keyboard nav shortcut: g then h/l/s/r/c ─── */
