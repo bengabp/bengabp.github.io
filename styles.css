@@ -405,25 +405,46 @@ em { font-style: italic; color: var(--chalk); }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   6DOF ROBOT ARM — hero overlay, interactive IK
+   6DOF ROBOT ARM — hero overlay, Three.js 3D, interactive IK
    =══════════════════════════════════════════════════════════════ */
 .robot {
   position: absolute;
   right: 4%;
-  top: 16%;
-  bottom: 22%;
-  width: clamp(220px, 24vw, 340px);
+  top: 12%;
+  /* leave a big gap to the hero__foot status row so the HUD never overlaps it */
+  bottom: 34%;
+  width: clamp(240px, 26vw, 360px);
   z-index: 2;
-  pointer-events: none;
+  cursor: pointer;
   animation: fadeSlide 1200ms var(--ease-out-expo) 900ms backwards;
 }
-.robot__svg {
-  width: 100%;
-  /* reserve the bottom for the HUD so it doesn't spill into hero__foot */
-  height: calc(100% - 62px);
-  display: block;
-  overflow: visible;
+.robot:focus-visible {
+  outline: 1px solid var(--amber);
+  outline-offset: 4px;
 }
+.robot__stage {
+  width: 100%;
+  height: calc(100% - 54px);
+  position: relative;
+}
+.robot__stage canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+.robot__hint {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 280ms var(--ease-swift);
+  z-index: 2;
+}
+.robot:hover .robot__hint { opacity: 0.85; color: var(--amber); }
 
 /* link fills and strokes — bright enough to read against pure black */
 .robot__base path,

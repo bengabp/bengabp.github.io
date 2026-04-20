@@ -282,111 +282,371 @@
     window.addEventListener('pointerleave', () => { mx = -9999; });
   }
 
-  /* ─── 6DOF robot arm — cursor-tracking IK ─── */
+  /* ─── 6DOF robot arm — Three.js 3D, cursor-tracking IK, click to cycle mode ─── */
   const robot = document.querySelector('.robot');
-  if (robot && !reduceMotion && window.matchMedia('(min-width: 1101px)').matches) {
-    const svg      = robot.querySelector('.robot__svg');
-    const jShoulder = document.getElementById('robotShoulder');
-    const jElbow    = document.getElementById('robotElbow');
-    const jWrist    = document.getElementById('robotWrist');
-    const hudJ1     = document.getElementById('robotJ1');
-    const hudJ2     = document.getElementById('robotJ2');
-    const hudJ3     = document.getElementById('robotJ3');
-    const hudJ6     = document.getElementById('robotJ6');
-    const hudMode   = document.getElementById('robotMode');
+  const stage = document.getElementById('robotStage');
+  if (robot && stage && typeof THREE !== 'undefined'
+      && !reduceMotion
+      && window.matchMedia('(min-width: 1101px)').matches) {
 
-    // link lengths in SVG viewBox units — match the HTML geometry
-    const L1 = 110;  // shoulder → elbow
-    const L2 = 85;   // elbow → wrist
-    const SHOULDER_VB = { x: 0, y: 0 };   // pivot in viewBox
-    const ELBOW_VB_Y  = -110;
-    const WRIST_VB_Y  = -195;
+    const hudJ1   = document.getElementById('robotJ1');
+    const hudJ2   = document.getElementById('robotJ2');
+    const hudJ3   = document.getElementById('robotJ3');
+    const hudJ6   = document.getElementById('robotJ6');
+    const hudMode = document.getElementById('robotMode');
 
-    let curT1 = 0, curT2 = 0, curT3 = 0;
-    let curJ1 = 0;                   // fake J1 waist motion (decorative)
-    let cursorX = 0, cursorY = 0;
-    let cursorActive = false;
-    let lastCursor = 0;
+    // ───── Three.js setup ─────
+    const scene = new THREE.Scene();
 
+    const aspect = () => stage.clientWidth / Math.max(1, stage.clientHeight);
+    const camera = new THREE.PerspectiveCamera(32, aspect(), 0.01, 50);
+    camera.position.set(0.9, 0.7, 1.5);
+    camera.lookAt(0, 0.45, 0);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(stage.clientWidth, stage.clientHeight, false);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    stage.appendChild(renderer.domElement);
+
+    // lighting — cool key, warm amber accent
+    scene.add(new THREE.AmbientLight(0xffffff, 0.22));
+    const key = new THREE.DirectionalLight(0xffffff, 1.1);
+    key.position.set(2.5, 3, 2);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0x6688aa, 0.35);
+    fill.position.set(-2, 1.5, -1);
+    scene.add(fill);
+    const amberPoint = new THREE.PointLight(0xff6b2b, 0.85, 1.8, 1.5);
+    amberPoint.position.set(0, 0.6, 0.25);
+    scene.add(amberPoint);
+
+    // materials
+    const matLink  = new THREE.MeshStandardMaterial({ color: 0x242424, metalness: 0.55, roughness: 0.45 });
+    const matLinkB = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.55, roughness: 0.55 });
+    const matJoint = new THREE.MeshStandardMaterial({ color: 0x2e2e2e, metalness: 0.55, roughness: 0.4 });
+    const matAmber = new THREE.MeshStandardMaterial({
+      color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 1.8,
+      metalness: 0.2, roughness: 0.5
+    });
+    const matAccent = new THREE.MeshStandardMaterial({
+      color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.6,
+      metalness: 0.3, roughness: 0.55
+    });
+
+    // ───── build robot ─────
+    // Floor pad
+    const pad = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.42, 0.42, 0.008, 48),
+      new THREE.MeshStandardMaterial({ color: 0x0e0e0e, metalness: 0.1, roughness: 0.9 })
+    );
+    pad.position.y = 0;
+    scene.add(pad);
+
+    // Radial ticks on the pad (decorative)
+    const tickRingGeom = new THREE.RingGeometry(0.32, 0.33, 60);
+    const tickRingMat = new THREE.MeshBasicMaterial({ color: 0x444444, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+    const tickRing = new THREE.Mesh(tickRingGeom, tickRingMat);
+    tickRing.rotation.x = -Math.PI / 2;
+    tickRing.position.y = 0.006;
+    scene.add(tickRing);
+
+    // Base mount (short truncated cone)
+    const base = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.19, 0.22, 0.06, 32),
+      matLinkB
+    );
+    base.position.y = 0.04;
+    scene.add(base);
+
+    // Amber stripe ring on the base
+    const stripe = new THREE.Mesh(
+      new THREE.TorusGeometry(0.205, 0.006, 8, 48),
+      matAccent
+    );
+    stripe.rotation.x = Math.PI / 2;
+    stripe.position.y = 0.065;
+    scene.add(stripe);
+
+    // J1 — waist rotation around Y
+    const J1 = new THREE.Group();
+    J1.position.y = 0.07;
+    scene.add(J1);
+
+    const waist = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.14, 0.13, 24),
+      matLink
+    );
+    waist.position.y = 0.065;
+    J1.add(waist);
+    // J1 LED
+    const j1Led = new THREE.Mesh(new THREE.SphereGeometry(0.012, 16, 12), matAmber);
+    j1Led.position.set(0.12, 0.065, 0.05);
+    J1.add(j1Led);
+
+    // J2 — shoulder rotation around X (at top of waist column)
+    const J2 = new THREE.Group();
+    J2.position.y = 0.13;
+    J1.add(J2);
+
+    // shoulder yoke (two flanges)
+    const yokeGeom = new THREE.CylinderGeometry(0.07, 0.07, 0.035, 24);
+    const yokeL = new THREE.Mesh(yokeGeom, matJoint); yokeL.rotation.z = Math.PI / 2; yokeL.position.x = -0.05; J2.add(yokeL);
+    const yokeR = new THREE.Mesh(yokeGeom, matJoint); yokeR.rotation.z = Math.PI / 2; yokeR.position.x =  0.05; J2.add(yokeR);
+    const shoulderPivot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.028, 0.028, 0.135, 16),
+      matAmber
+    );
+    shoulderPivot.rotation.z = Math.PI / 2;
+    J2.add(shoulderPivot);
+
+    // Upper arm (L1 = 0.34)
+    const UPPER_LEN = 0.34;
+    const upperArm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.09, UPPER_LEN, 0.09),
+      matLink
+    );
+    upperArm.position.y = UPPER_LEN / 2;
+    J2.add(upperArm);
+    // subtle amber spine running up the arm
+    const spine1 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.012, UPPER_LEN - 0.06, 0.005),
+      matAccent
+    );
+    spine1.position.set(0.047, UPPER_LEN / 2, 0);
+    J2.add(spine1);
+
+    // J3 — elbow at top of upper arm
+    const J3 = new THREE.Group();
+    J3.position.y = UPPER_LEN;
+    J2.add(J3);
+
+    const elbowPivot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.055, 0.055, 0.105, 24),
+      matJoint
+    );
+    elbowPivot.rotation.z = Math.PI / 2;
+    J3.add(elbowPivot);
+    const elbowHub = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.022, 0.022, 0.11, 16),
+      matAmber
+    );
+    elbowHub.rotation.z = Math.PI / 2;
+    J3.add(elbowHub);
+
+    // Forearm (L2 = 0.26)
+    const FORE_LEN = 0.26;
+    const forearm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.07, FORE_LEN, 0.07),
+      matLink
+    );
+    forearm.position.y = FORE_LEN / 2;
+    J3.add(forearm);
+    // forearm amber stripe
+    const spine2 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.01, FORE_LEN - 0.05, 0.004),
+      matAccent
+    );
+    spine2.position.set(0.037, FORE_LEN / 2, 0);
+    J3.add(spine2);
+
+    // J4 — wrist, combined into one pitch for this view
+    const J4 = new THREE.Group();
+    J4.position.y = FORE_LEN;
+    J3.add(J4);
+
+    const wristPivot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.038, 0.038, 0.07, 16),
+      matJoint
+    );
+    wristPivot.rotation.z = Math.PI / 2;
+    J4.add(wristPivot);
+    const wristHub = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.016, 0.016, 0.074, 16),
+      matAmber
+    );
+    wristHub.rotation.z = Math.PI / 2;
+    J4.add(wristHub);
+
+    // Tool flange (cylinder)
+    const flange = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.038, 0.03, 0.05, 18),
+      matLink
+    );
+    flange.position.y = 0.045;
+    J4.add(flange);
+    const flangeRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.038, 0.003, 8, 28),
+      matAccent
+    );
+    flangeRing.rotation.x = Math.PI / 2;
+    flangeRing.position.y = 0.068;
+    J4.add(flangeRing);
+
+    // Gripper fingers
+    const fingerGeom = new THREE.BoxGeometry(0.012, 0.055, 0.02);
+    const finger1 = new THREE.Mesh(fingerGeom, matLink);
+    finger1.position.set( 0.024, 0.115, 0);
+    J4.add(finger1);
+    const finger2 = new THREE.Mesh(fingerGeom, matLink);
+    finger2.position.set(-0.024, 0.115, 0);
+    J4.add(finger2);
+    // inner gripper pad
+    const pad1 = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.035, 0.015), matAccent);
+    pad1.position.set( 0.018, 0.11, 0); J4.add(pad1);
+    const pad2 = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.035, 0.015), matAccent);
+    pad2.position.set(-0.018, 0.11, 0); J4.add(pad2);
+
+    // TCP marker
+    const tcp = new THREE.Mesh(new THREE.SphereGeometry(0.012, 18, 14), matAmber);
+    tcp.position.y = 0.16;
+    J4.add(tcp);
+
+    // ───── IK ─────
+    const L1 = UPPER_LEN;
+    const L2 = FORE_LEN;
+    const SHOULDER_WORLD_Y = 0.07 + 0.13;  // J1.position.y + J2.position.y (approx)
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-    const ik = (tx, ty) => {
+    // IK returns angles for J1 (waist yaw), J2 (shoulder pitch), J3 (elbow pitch),
+    // and J4 (wrist pitch compensation to keep flange vertical-up).
+    const solveIK = (target /* THREE.Vector3 world coords */) => {
+      const j1 = Math.atan2(target.x, target.z);      // yaw toward target
+      // horizontal distance from base axis
+      const horiz = Math.hypot(target.x, target.z);
+      // in the arm plane: +X=horizontal, +Y=vertical; shoulder at (0, SHOULDER_WORLD_Y)
+      const tx = horiz;
+      const ty = target.y - SHOULDER_WORLD_Y;
+
       let d = Math.hypot(tx, ty);
-      const maxR = L1 + L2 - 3;
-      const minR = Math.abs(L1 - L2) + 8;
-      if (d > maxR) { tx *= maxR / d; ty *= maxR / d; d = maxR; }
-      if (d < minR) { tx *= minR / d; ty *= minR / d; d = minR; }
-      const c = clamp((d * d - L1 * L1 - L2 * L2) / (2 * L1 * L2), -1, 1);
-      const theta2 = Math.acos(c);
-      const alpha  = Math.atan2(tx, -ty);
-      const beta   = Math.atan2(L2 * Math.sin(theta2), L1 + L2 * Math.cos(theta2));
-      const theta1 = alpha - beta;
-      return { theta1, theta2 };
+      const maxR = L1 + L2 - 0.01;
+      const minR = Math.abs(L1 - L2) + 0.04;
+      let rx = tx, ry = ty;
+      if (d > maxR) { const k = maxR / d; rx = tx * k; ry = ty * k; d = maxR; }
+      if (d < minR) { const k = minR / d; rx = tx * k; ry = ty * k; d = minR; }
+
+      const cos3 = clamp((d*d - L1*L1 - L2*L2) / (2*L1*L2), -1, 1);
+      const theta3 = Math.acos(cos3);  // elbow bend (always ≥ 0)
+      const alpha  = Math.atan2(ry, rx);
+      const beta   = Math.atan2(L2 * Math.sin(theta3), L1 + L2 * Math.cos(theta3));
+      const theta2_plane = alpha - beta;  // upper-arm angle from horizontal, in plane
+
+      // convert to joint rotations in local frames:
+      //  - When J2.rotation.x = 0, upper arm points up (+Y). Tilting -X rotates it forward.
+      //  - We want arm angle θ from horizontal → rotation.x = θ - π/2 (but Three.js sign flip)
+      //  - After testing: rotation.x = Math.PI/2 - theta2_plane works
+      const j2 = Math.PI / 2 - theta2_plane;
+      const j3 = -theta3;     // bend the elbow "back" (forearm rotates CCW vs upper arm when viewed from -X side)
+      const j4 = -(j2 + j3);  // keep flange vertical-up in world frame (approx)
+      return { j1, j2, j3, j4 };
     };
 
+    // ───── interaction ─────
+    let cursorX = 0, cursorY = 0, cursorActive = false, lastCursor = 0;
+    const raycaster = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    // plane at z = 0 in world space (faces camera)
+    const reachPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
     window.addEventListener('pointermove', (e) => {
-      cursorX = e.clientX;
-      cursorY = e.clientY;
-      cursorActive = true;
-      lastCursor = performance.now();
+      cursorX = e.clientX; cursorY = e.clientY;
+      cursorActive = true; lastCursor = performance.now();
     }, { passive: true });
     window.addEventListener('pointerleave', () => { cursorActive = false; });
 
+    // modes
+    const MODES = ['tracking', 'idle · sweep', 'paused'];
+    let modeIdx = 0;
+
+    const cycleMode = () => {
+      modeIdx = (modeIdx + 1) % MODES.length;
+      hudMode.textContent = MODES[modeIdx];
+      hudMode.classList.toggle('amber', MODES[modeIdx] !== 'paused');
+    };
+    robot.addEventListener('click', cycleMode);
+    robot.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cycleMode(); }
+    });
+
+    // current/target IK angles
+    let j1c=0, j2c=-0.3, j3c=-1.2, j4c=0;
+
     const fmtDeg = (rad) => {
       const d = rad * 180 / Math.PI;
-      const sign = d >= 0 ? '+' : '−';
-      return sign + Math.abs(d).toFixed(1).padStart(5, '0') + '°';
+      return (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1).padStart(5, '0') + '°';
     };
+
+    const worldTarget = new THREE.Vector3();
+
+    const resize = () => {
+      if (!stage.clientWidth) return;
+      renderer.setSize(stage.clientWidth, stage.clientHeight, false);
+      camera.aspect = aspect();
+      camera.updateProjectionMatrix();
+    };
+    window.addEventListener('resize', resize, { passive: true });
 
     const tickRobot = (t) => {
       const now = performance.now();
-      const idle = !cursorActive || (now - lastCursor > 2500);
+      const mode = MODES[modeIdx];
 
-      let tx, ty;
-      if (idle) {
-        hudMode.textContent = 'idle · sweep';
-        hudMode.classList.remove('amber');
-        const p = t * 0.00045;
-        tx = Math.sin(p) * 95;
-        ty = -140 + Math.cos(p * 1.4) * 38;
-      } else {
-        hudMode.textContent = 'tracking';
-        hudMode.classList.add('amber');
-        const rect = svg.getBoundingClientRect();
-        const vb = svg.viewBox.baseVal;
-        // cursor → viewBox coords
-        const sx = ((cursorX - rect.left) / rect.width)  * vb.width  + vb.x;
-        const sy = ((cursorY - rect.top)  / rect.height) * vb.height + vb.y;
-        tx = sx - SHOULDER_VB.x;
-        ty = sy - SHOULDER_VB.y;
+      let tX, tY, tZ;
+      if (mode === 'tracking') {
+        // auto-idle after inactivity is just a visual — don't change mode
+        if (cursorActive) {
+          const rect = stage.getBoundingClientRect();
+          // NDC (-1..1) from cursor over the stage
+          ndc.x = ((cursorX - rect.left) / rect.width) * 2 - 1;
+          ndc.y = -((cursorY - rect.top) / rect.height) * 2 + 1;
+          // extend the NDC range so the arm reaches a bit beyond the stage
+          ndc.x *= 2.2;
+          ndc.y *= 1.6;
+          raycaster.setFromCamera(ndc, camera);
+          const hit = new THREE.Vector3();
+          if (raycaster.ray.intersectPlane(reachPlane, hit)) {
+            tX = hit.x; tY = hit.y; tZ = hit.z + 0.25;  // bring target slightly in front
+          } else {
+            tX = 0.3; tY = 0.6; tZ = 0.25;
+          }
+        } else {
+          tX = 0.3; tY = 0.55; tZ = 0.25;
+        }
+      } else if (mode === 'idle · sweep') {
+        const p = t * 0.00055;
+        tX = Math.sin(p) * 0.35;
+        tY = 0.55 + Math.cos(p * 1.5) * 0.15;
+        tZ = 0.2 + Math.sin(p * 0.8) * 0.15;
+      } else { // paused — hold last target
+        tX = worldTarget.x; tY = worldTarget.y; tZ = worldTarget.z;
       }
 
-      const { theta1, theta2 } = ik(tx, ty);
-      const targetJ6 = -(theta1 + theta2);      // keep flange pointing "up" in world
+      worldTarget.set(tX, tY, tZ);
+      const { j1, j2, j3, j4 } = solveIK(worldTarget);
 
-      // decorative J1 waist sway
-      const targetJ1 = Math.sin(t * 0.00025) * 0.18 + (idle ? 0 : (cursorX / window.innerWidth - 0.5) * 0.4);
+      // smoothing
+      const s = 0.12;
+      j1c += (j1 - j1c) * s;
+      j2c += (j2 - j2c) * s;
+      j3c += (j3 - j3c) * s;
+      j4c += (j4 - j4c) * s;
 
-      // critically-damped smoothing
-      const s = 0.14;
-      curT1 += (theta1  - curT1) * s;
-      curT2 += (theta2  - curT2) * s;
-      curT3 += (targetJ6 - curT3) * s;
-      curJ1 += (targetJ1 - curJ1) * s;
+      J1.rotation.y = j1c;
+      J2.rotation.x = j2c;
+      J3.rotation.x = j3c;
+      J4.rotation.x = j4c;
 
-      const d2r = 180 / Math.PI;
-      jShoulder.setAttribute('transform', `rotate(${(curT1 * d2r).toFixed(2)} ${SHOULDER_VB.x} ${SHOULDER_VB.y})`);
-      jElbow.setAttribute   ('transform', `rotate(${(curT2 * d2r).toFixed(2)} 0 ${ELBOW_VB_Y})`);
-      jWrist.setAttribute   ('transform', `rotate(${(curT3 * d2r).toFixed(2)} 0 ${WRIST_VB_Y})`);
+      hudJ1.textContent = fmtDeg(j1c);
+      hudJ2.textContent = fmtDeg(j2c);
+      hudJ3.textContent = fmtDeg(j3c);
+      hudJ6.textContent = fmtDeg(j4c);
 
-      hudJ1.textContent = fmtDeg(curJ1);
-      hudJ2.textContent = fmtDeg(curT1);
-      hudJ3.textContent = fmtDeg(curT2);
-      hudJ6.textContent = fmtDeg(curT3);
-
+      renderer.render(scene, camera);
       requestAnimationFrame(tickRobot);
     };
 
+    // init HUD & start
+    hudMode.textContent = MODES[modeIdx];
+    hudMode.classList.add('amber');
     requestAnimationFrame(tickRobot);
   }
 

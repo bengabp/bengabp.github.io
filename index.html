@@ -106,91 +106,10 @@
       </div>
     </div>
 
-    <!-- 6DOF industrial robot arm — cursor-tracking IK -->
-    <div class="robot" aria-hidden="true">
-      <svg class="robot__svg" viewBox="-140 -300 280 380" xmlns="http://www.w3.org/2000/svg">
-        <!-- ground tick marks -->
-        <g class="robot__floor">
-          <line x1="-120" y1="60" x2="120" y2="60" stroke-dasharray="2 5"/>
-          <line x1="-80"  y1="60" x2="-80"  y2="66"/>
-          <line x1="-40"  y1="60" x2="-40"  y2="66"/>
-          <line x1="0"    y1="60" x2="0"    y2="66"/>
-          <line x1="40"   y1="60" x2="40"   y2="66"/>
-          <line x1="80"   y1="60" x2="80"   y2="66"/>
-        </g>
-
-        <!-- base plate -->
-        <g class="robot__base">
-          <path d="M -60 40 L 60 40 L 52 60 L -52 60 Z"/>
-          <rect x="-42" y="40" width="84" height="4" class="robot__accent"/>
-          <circle cx="-42" cy="50" r="1.8"/>
-          <circle cx="0"   cy="50" r="1.8"/>
-          <circle cx="42"  cy="50" r="1.8"/>
-        </g>
-
-        <!-- waist column (J1 housing) -->
-        <g class="robot__waist">
-          <rect x="-22" y="0" width="44" height="40" rx="2"/>
-          <rect x="-18" y="4" width="36" height="6" class="robot__hairline" fill="none"/>
-          <rect x="-18" y="28" width="36" height="6" class="robot__hairline" fill="none"/>
-          <circle cx="0" cy="20" r="2.5" class="robot__led"/>
-          <text x="28" y="23" class="robot__label">J1</text>
-        </g>
-
-        <!-- J2 shoulder hinge, pivot (0,0) -->
-        <g id="robotShoulder" class="robot__link-group">
-          <!-- upper arm -->
-          <rect x="-9" y="-110" width="18" height="110" rx="1.5"/>
-          <rect x="-9" y="-96"  width="18" height="5" class="robot__hairline" fill="none"/>
-          <rect x="-9" y="-24"  width="18" height="5" class="robot__hairline" fill="none"/>
-          <line x1="0" y1="-100" x2="0" y2="-10" class="robot__spine"/>
-
-          <!-- shoulder joint visuals -->
-          <circle cx="0" cy="0" r="17" class="robot__joint"/>
-          <circle cx="0" cy="0" r="11" class="robot__hairline" fill="none"/>
-          <circle cx="0" cy="0" r="2.8" class="robot__led"/>
-          <text x="24" y="4" class="robot__label">J2</text>
-
-          <!-- J3 elbow, pivot (0, -110) -->
-          <g id="robotElbow" class="robot__link-group">
-            <!-- forearm -->
-            <rect x="-7" y="-195" width="14" height="85" rx="1.5"/>
-            <rect x="-7" y="-183" width="14" height="4" class="robot__hairline" fill="none"/>
-            <rect x="-7" y="-126" width="14" height="4" class="robot__hairline" fill="none"/>
-            <line x1="0" y1="-185" x2="0" y2="-118" class="robot__spine"/>
-
-            <!-- elbow joint visuals -->
-            <circle cx="0" cy="-110" r="13" class="robot__joint"/>
-            <circle cx="0" cy="-110" r="8"  class="robot__hairline" fill="none"/>
-            <circle cx="0" cy="-110" r="2.2" class="robot__led"/>
-            <text x="20" y="-106" class="robot__label">J3</text>
-
-            <!-- J4/5/6 wrist assembly, pivot (0, -195) -->
-            <g id="robotWrist" class="robot__link-group">
-              <!-- wrist joint -->
-              <circle cx="0" cy="-195" r="9" class="robot__joint"/>
-              <circle cx="0" cy="-195" r="5" class="robot__hairline" fill="none"/>
-              <circle cx="0" cy="-195" r="1.6" class="robot__led"/>
-
-              <!-- tool flange -->
-              <rect x="-8" y="-213" width="16" height="18" rx="1"/>
-              <rect x="-8" y="-210" width="16" height="3" class="robot__hairline" fill="none"/>
-              <line x1="-10" y1="-213" x2="10" y2="-213" class="robot__accent"/>
-
-              <!-- gripper fingers -->
-              <g class="robot__gripper">
-                <path d="M -5 -213 L -10 -230 L -7.5 -232 L -2.5 -214 Z"/>
-                <path d="M  5 -213 L  10 -230 L  7.5 -232 L  2.5 -214 Z"/>
-              </g>
-
-              <!-- TCP (tool center point) -->
-              <circle cx="0" cy="-230" r="2.5" class="robot__tcp"/>
-              <circle cx="0" cy="-230" r="7"   class="robot__tcp-ring" fill="none"/>
-              <text x="12" y="-227" class="robot__label robot__label--tcp">TCP</text>
-            </g>
-          </g>
-        </g>
-      </svg>
+    <!-- 6DOF industrial robot arm — 3D (Three.js), cursor-tracking IK, click to cycle mode -->
+    <div class="robot" role="button" tabindex="0" aria-label="Robot arm; click or press Enter to toggle mode">
+      <div class="robot__stage" id="robotStage"></div>
+      <div class="robot__hint mono micro">▸ click to toggle mode</div>
 
       <!-- HUD readout -->
       <div class="robot__hud mono micro">
@@ -963,6 +882,7 @@
 
 </main>
 
+<script src="lib/three.min.js"></script>
 <script src="script.js" defer></script>
 </body>
 </html>
