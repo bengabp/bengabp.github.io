@@ -77,34 +77,49 @@
     gRenderer.outputEncoding = THREE.sRGBEncoding;
     gearStage.appendChild(gRenderer.domElement);
 
-    // Lights — neutral key + warm amber fill so the gears read metallic
-    gScene.add(new THREE.AmbientLight(0xffffff, 0.28));
-    const gKey = new THREE.DirectionalLight(0xffffff, 1.25);
+    // Lighting — moody, amber-led
+    gScene.add(new THREE.AmbientLight(0x404040, 0.4));
+    const gKey = new THREE.DirectionalLight(0xf5e8d6, 0.7);
     gKey.position.set(1.5, 2, 2.5);
     gScene.add(gKey);
-    const gAmber = new THREE.PointLight(0xff6b2b, 1.1, 4, 1.4);
-    gAmber.position.set(0, 0, 1.2);
+    const gAmber = new THREE.PointLight(0xff6b2b, 1.4, 5, 1.2);
+    gAmber.position.set(0, 0, 1.4);
     gScene.add(gAmber);
-    const gFill = new THREE.DirectionalLight(0x7b92a8, 0.35);
-    gFill.position.set(-2, -1, 1);
-    gScene.add(gFill);
 
-    // Materials — match Ben's actual orange PLA filament
-    const matPlanet = new THREE.MeshStandardMaterial({
-      color: 0xff6b2b, metalness: 0.15, roughness: 0.55,
-      emissive: 0xff6b2b, emissiveIntensity: 0.04
+    // Materials — OLED-dark bodies + amber wire edges = site aesthetic
+    const matBody = new THREE.MeshStandardMaterial({
+      color: 0x0a0a0a, metalness: 0.1, roughness: 0.65,
+      transparent: true, opacity: 0.88
     });
-    const matSun = new THREE.MeshStandardMaterial({
-      color: 0xff7a3a, metalness: 0.25, roughness: 0.42,
-      emissive: 0xff6b2b, emissiveIntensity: 0.28
+    const matBodySun = new THREE.MeshStandardMaterial({
+      color: 0x140a04, metalness: 0.2, roughness: 0.55,
+      emissive: 0xff6b2b, emissiveIntensity: 0.55,
+      transparent: true, opacity: 0.92
     });
-    const matRing = new THREE.MeshStandardMaterial({
-      color: 0xd85420, metalness: 0.15, roughness: 0.6,
-      emissive: 0xff6b2b, emissiveIntensity: 0.03
+    const matEdge = new THREE.LineBasicMaterial({
+      color: 0xff6b2b, transparent: true, opacity: 0.85
+    });
+    const matEdgeDim = new THREE.LineBasicMaterial({
+      color: 0xff6b2b, transparent: true, opacity: 0.45
     });
     const matAxle = new THREE.MeshStandardMaterial({
-      color: 0x2a2a2a, metalness: 0.92, roughness: 0.18
+      color: 0x2a2a2a, metalness: 0.9, roughness: 0.2
     });
+
+    // Factory: extruded gear geometry + hot amber edge overlay, returned as Group
+    const buildGear = (geom, bodyMat, edgeMat) => {
+      const group = new THREE.Group();
+      const body = new THREE.Mesh(geom, bodyMat);
+      group.add(body);
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(geom, 20),
+        edgeMat
+      );
+      group.add(edges);
+      group.userData.body = body;
+      group.userData.edges = edges;
+      return group;
+    };
 
     // Gear shape builder — involute-ish with trapezoidal teeth
     const makeGearShape = (rootR, outerR, teeth) => {
@@ -136,7 +151,7 @@
       return shape;
     };
 
-    const makeGear = (rootR, outerR, teeth, boreR, thickness, mat) => {
+    const gearGeom = (rootR, outerR, teeth, boreR, thickness) => {
       const shape = makeGearShape(rootR, outerR, teeth);
       const hole = new THREE.Path();
       hole.absarc(0, 0, boreR, 0, Math.PI * 2, false);
@@ -144,17 +159,16 @@
       const geom = new THREE.ExtrudeGeometry(shape, {
         depth: thickness,
         bevelEnabled: true,
-        bevelSize: 0.008,
-        bevelThickness: 0.008,
+        bevelSize: 0.006,
+        bevelThickness: 0.006,
         bevelSegments: 2,
       });
       geom.translate(0, 0, -thickness / 2);
       geom.computeVertexNormals();
-      return new THREE.Mesh(geom, mat);
+      return geom;
     };
 
-    // Ring gear — outer disc with internal teeth (cut from the bore)
-    const makeRingGear = (outerR, toothRoot, toothTip, teeth, thickness, mat) => {
+    const ringGeom = (outerR, toothRoot, toothTip, teeth, thickness) => {
       const shape = new THREE.Shape();
       shape.absarc(0, 0, outerR, 0, Math.PI * 2, false);
       const hole = new THREE.Path();
@@ -162,15 +176,14 @@
       const toothAngle = tau / teeth;
       const toothHalf  = toothAngle * 0.3;
       const flankHalf  = toothAngle * 0.5;
-      // internal teeth — valleys on outer radius, peaks pointing inward
       for (let i = 0; i < teeth; i++) {
         const base = i * toothAngle;
         const a1 = base - flankHalf;
         const a2 = base - toothHalf;
         const a3 = base + toothHalf;
         const a4 = base + flankHalf;
-        const rOut = toothTip;     // outer of the hole (valley) — further from center
-        const rIn  = toothRoot;    // inner of the hole (tooth tip) — closer to center
+        const rOut = toothTip;
+        const rIn  = toothRoot;
         const pts = [
           [Math.cos(a1) * rOut, Math.sin(a1) * rOut],
           [Math.cos(a2) * rOut, Math.sin(a2) * rOut],
@@ -189,12 +202,12 @@
       const geom = new THREE.ExtrudeGeometry(shape, {
         depth: thickness,
         bevelEnabled: true,
-        bevelSize: 0.01, bevelThickness: 0.01,
+        bevelSize: 0.008, bevelThickness: 0.008,
         bevelSegments: 2,
       });
       geom.translate(0, 0, -thickness / 2);
       geom.computeVertexNormals();
-      return new THREE.Mesh(geom, mat);
+      return geom;
     };
 
     // Tooth counts — chosen so Zr = Zs + 2*Zp (geometry closes) and ratios
@@ -211,9 +224,19 @@
     const PLANET_ORBIT = 0.50;
     const GEAR_Z = 0.2;
 
-    // Sun gear
-    const sun = makeGear(SUN_ROOT, SUN_TIP, Zs, 0.09, GEAR_Z, matSun);
+    // Sun — dark body with amber edge + soft inner glow
+    const sun = buildGear(gearGeom(SUN_ROOT, SUN_TIP, Zs, 0.09, GEAR_Z), matBodySun, matEdge);
     gScene.add(sun);
+    // Amber inner glow disc behind the sun
+    const sunGlow = new THREE.Mesh(
+      new THREE.CircleGeometry(SUN_TIP * 1.6, 48),
+      new THREE.MeshBasicMaterial({
+        color: 0xff6b2b, transparent: true, opacity: 0.12, depthWrite: false
+      })
+    );
+    sunGlow.position.z = -0.12;
+    gScene.add(sunGlow);
+
     const sunAxle = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.36, 18),
       matAxle
@@ -222,28 +245,25 @@
     gScene.add(sunAxle);
 
     // Ring gear (fixed)
-    const ring = makeRingGear(RING_OUTER, RING_TOOTH_ROOT, RING_TOOTH_TIP, Zr, GEAR_Z, matRing);
+    const ring = buildGear(
+      ringGeom(RING_OUTER, RING_TOOTH_ROOT, RING_TOOTH_TIP, Zr, GEAR_Z),
+      matBody, matEdgeDim
+    );
     gScene.add(ring);
 
     // Carrier group — planets are children so they orbit when carrier rotates.
-    // Carrier has a secondary group for the "explode push" on Z so rotation &
-    // translation don't fight.
     const carrierRotate = new THREE.Group();
     gScene.add(carrierRotate);
 
-    // Planet meshes + axles (axles are siblings, not children of carrierRotate,
-    // because they need to follow the carrier AND the axial explode push)
     const planets = [];
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
-      const p = makeGear(PLANET_ROOT, PLANET_TIP, Zp, 0.055, GEAR_Z, matPlanet);
+      const p = buildGear(gearGeom(PLANET_ROOT, PLANET_TIP, Zp, 0.055, GEAR_Z), matBody, matEdge);
       p.position.x = Math.cos(angle) * PLANET_ORBIT;
       p.position.y = Math.sin(angle) * PLANET_ORBIT;
-      // stagger initial tooth phase so teeth mesh properly with sun+ring
       p.rotation.z = -angle * (Zs / Zp);
       carrierRotate.add(p);
 
-      // axle rides with the planet — child of carrier
       const ax = new THREE.Mesh(
         new THREE.CylinderGeometry(0.028, 0.028, 0.35, 14),
         matAxle
@@ -252,7 +272,6 @@
       ax.position.copy(p.position);
       carrierRotate.add(ax);
       p.userData.axle = ax;
-
       p.userData.basePhase = -angle * (Zs / Zp);
       planets.push(p);
     }
