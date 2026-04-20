@@ -424,34 +424,35 @@ em { font-style: italic; color: var(--chalk); }
   overflow: visible;
 }
 
-/* link fills and strokes */
+/* link fills and strokes — bright enough to read against pure black */
 .robot__base path,
 .robot__waist rect,
 .robot__link-group rect,
 .robot__link-group path {
-  fill: #0e0e0e;
-  stroke: #333;
-  stroke-width: 0.8;
-}
-.robot__base rect.robot__accent {
-  fill: rgba(255,107,43,0.22);
-  stroke: rgba(255,107,43,0.55);
-}
-.robot__base circle { fill: #2a2a2a; }
-
-.robot__joint {
-  fill: #141414;
-  stroke: #444;
+  fill: #1f1f1f;
+  stroke: #6a6a6a;
   stroke-width: 1;
 }
+.robot__base rect.robot__accent {
+  fill: rgba(255,107,43,0.28);
+  stroke: rgba(255,107,43,0.7);
+  stroke-width: 0.8;
+}
+.robot__base circle { fill: #5a5a5a; }
+
+.robot__joint {
+  fill: #262626;
+  stroke: #7a7a7a;
+  stroke-width: 1.1;
+}
 .robot__hairline {
-  stroke: #3a3a3a;
-  stroke-width: 0.7;
+  stroke: #5a5a5a;
+  stroke-width: 0.8;
   fill: none;
 }
 .robot__spine {
-  stroke: rgba(255,107,43,0.14);
-  stroke-width: 0.6;
+  stroke: rgba(255,107,43,0.28);
+  stroke-width: 0.7;
   stroke-dasharray: 3 3;
 }
 .robot__led {
@@ -467,14 +468,14 @@ em { font-style: italic; color: var(--chalk); }
 }
 
 .robot__floor line {
-  stroke: rgba(138,134,132,0.28);
-  stroke-width: 0.6;
+  stroke: rgba(138,134,132,0.55);
+  stroke-width: 0.8;
 }
 
 .robot__label {
   font-family: var(--mono);
-  font-size: 7.5px;
-  fill: var(--dim);
+  font-size: 8px;
+  fill: var(--ghost);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -497,9 +498,9 @@ em { font-style: italic; color: var(--chalk); }
 }
 
 .robot__gripper path {
-  fill: #161616;
-  stroke: #3a3a3a;
-  stroke-width: 0.8;
+  fill: #262626;
+  stroke: #7a7a7a;
+  stroke-width: 1;
 }
 
 /* HUD */

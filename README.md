@@ -18,13 +18,13 @@ Icons CDN.
 
 Sections:
 
-- `§ 01` — Subject brief
-- `§ 02` — Transmission log (work history, 5 entries, reverse-chronological)
-- `§ 03` — Lab (featured 41 : 1 planetary gearbox + specimen cards)
-- `§ 04` — Stack manifest (animated tech toolbelt + chip grid)
-- `§ 05` — Open repositories (pinned GitHub)
-- `§ 06` — Currently learning (Moscow Polytechnic · Russian · Math · Robotics)
-- `§ 07` — End of transmission (contact)
+- `/ 01` — Subject brief
+- `/ 02` — Transmission log (work history, 5 entries, reverse-chronological)
+- `/ 03` — Lab (featured 41 : 1 planetary gearbox + specimen cards)
+- `/ 04` — Stack manifest (animated tech toolbelt + chip grid)
+- `/ 05` — Open repositories (pinned GitHub)
+- `/ 06` — Currently learning (Moscow Polytechnic · Russian · Math · Robotics)
+- `/ 07` — End of transmission (contact)
 
 ## Stack
 
