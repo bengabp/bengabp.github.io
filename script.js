@@ -300,9 +300,9 @@
 
     const aspect = () => stage.clientWidth / Math.max(1, stage.clientHeight);
     const camera = new THREE.PerspectiveCamera(32, aspect(), 0.01, 50);
-    // pulled back and slightly higher — keeps the whole arm (including base) in frame
-    camera.position.set(1.25, 0.95, 2.1);
-    camera.lookAt(0, 0.42, 0);
+    // framed so the glass enclosure sits in comfortable negative space
+    camera.position.set(1.55, 1.1, 2.55);
+    camera.lookAt(0, 0.48, 0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -335,180 +335,230 @@
     });
 
     // ───── build robot ─────
-    // Floor pad — kept modest so it doesn't dominate the frame
-    const pad = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.28, 0.28, 0.008, 48),
-      new THREE.MeshStandardMaterial({ color: 0x0e0e0e, metalness: 0.1, roughness: 0.9 })
+    // ═══ Modern cobot-style arm — cylinders, spheres, capsules ═══
+
+    // Floor plate (inside the glass case)
+    const floor = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.22, 0.22, 0.004, 48),
+      new THREE.MeshStandardMaterial({ color: 0x0a0a0a, metalness: 0.25, roughness: 0.55 })
     );
-    pad.position.y = 0;
-    scene.add(pad);
+    floor.position.y = 0;
+    scene.add(floor);
 
-    // Radial tick ring on the pad (decorative)
-    const tickRingGeom = new THREE.RingGeometry(0.22, 0.225, 60);
-    const tickRingMat = new THREE.MeshBasicMaterial({ color: 0x444444, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
-    const tickRing = new THREE.Mesh(tickRingGeom, tickRingMat);
-    tickRing.rotation.x = -Math.PI / 2;
-    tickRing.position.y = 0.006;
-    scene.add(tickRing);
-
-    // Base mount (short truncated cone)
-    const base = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.15, 0.18, 0.06, 32),
-      matLinkB
-    );
-    base.position.y = 0.04;
-    scene.add(base);
-
-    // Thin accent ring on the base — dim amber-tinted metal, not glowing
-    const stripe = new THREE.Mesh(
-      new THREE.TorusGeometry(0.162, 0.004, 8, 48),
-      new THREE.MeshStandardMaterial({
-        color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.22,
-        metalness: 0.4, roughness: 0.6
+    // Amber tick ring on the floor
+    const tickRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.188, 0.193, 80),
+      new THREE.MeshBasicMaterial({
+        color: 0xff6b2b, transparent: true, opacity: 0.35, side: THREE.DoubleSide
       })
     );
-    stripe.rotation.x = Math.PI / 2;
-    stripe.position.y = 0.065;
-    scene.add(stripe);
+    tickRing.rotation.x = -Math.PI / 2;
+    tickRing.position.y = 0.003;
+    scene.add(tickRing);
 
-    // J1 — waist rotation around Y
+    // Base pedestal (smooth truncated cone)
+    const base = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.1, 0.14, 0.05, 40),
+      matLinkB
+    );
+    base.position.y = 0.028;
+    scene.add(base);
+
+    // J1 rotation cap (flat disc between base and waist)
+    const j1Cap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.098, 0.098, 0.015, 40),
+      matJoint
+    );
+    j1Cap.position.y = 0.062;
+    scene.add(j1Cap);
+
+    // ── J1 — waist ──
     const J1 = new THREE.Group();
-    J1.position.y = 0.07;
+    J1.position.y = 0.075;
     scene.add(J1);
 
+    // Waist cylinder
     const waist = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.12, 0.14, 0.13, 24),
+      new THREE.CylinderGeometry(0.055, 0.07, 0.115, 32),
       matLink
     );
-    waist.position.y = 0.065;
+    waist.position.y = 0.06;
     J1.add(waist);
-    // J1 LED
-    const j1Led = new THREE.Mesh(new THREE.SphereGeometry(0.012, 16, 12), matAmber);
-    j1Led.position.set(0.12, 0.065, 0.05);
+    // Rounded cap on top of waist
+    const waistCap = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+      matLink
+    );
+    waistCap.position.y = 0.117;
+    J1.add(waistCap);
+    // J1 LED (small indicator)
+    const j1Led = new THREE.Mesh(new THREE.SphereGeometry(0.008, 16, 12), matAmber);
+    j1Led.position.set(0.058, 0.095, 0);
     J1.add(j1Led);
 
-    // J2 — shoulder rotation around X (at top of waist column)
+    // ── J2 — shoulder ──
     const J2 = new THREE.Group();
-    J2.position.y = 0.13;
+    J2.position.y = 0.125;
     J1.add(J2);
 
-    // shoulder yoke (two flanges)
-    const yokeGeom = new THREE.CylinderGeometry(0.07, 0.07, 0.035, 24);
-    const yokeL = new THREE.Mesh(yokeGeom, matJoint); yokeL.rotation.z = Math.PI / 2; yokeL.position.x = -0.05; J2.add(yokeL);
-    const yokeR = new THREE.Mesh(yokeGeom, matJoint); yokeR.rotation.z = Math.PI / 2; yokeR.position.x =  0.05; J2.add(yokeR);
-    const shoulderPivot = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.028, 0.028, 0.135, 16),
-      matHub
+    // Shoulder sphere (around the pivot)
+    const shoulderSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 28, 20),
+      matJoint
     );
-    shoulderPivot.rotation.z = Math.PI / 2;
-    J2.add(shoulderPivot);
+    J2.add(shoulderSphere);
+    // Subtle amber ring around the shoulder hub
+    const shoulderRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.057, 0.0022, 8, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.55,
+        metalness: 0.3, roughness: 0.5
+      })
+    );
+    shoulderRing.rotation.y = Math.PI / 2;
+    J2.add(shoulderRing);
 
-    // Upper arm (L1 = 0.34)
-    const UPPER_LEN = 0.34;
+    // Upper arm — sleek cylinder
+    const UPPER_LEN = 0.32;
     const upperArm = new THREE.Mesh(
-      new THREE.BoxGeometry(0.09, UPPER_LEN, 0.09),
+      new THREE.CylinderGeometry(0.036, 0.042, UPPER_LEN, 28),
       matLink
     );
     upperArm.position.y = UPPER_LEN / 2;
     J2.add(upperArm);
-    // subtle amber spine running up the arm
-    const spine1 = new THREE.Mesh(
-      new THREE.BoxGeometry(0.012, UPPER_LEN - 0.06, 0.005),
-      matAccent
-    );
-    spine1.position.set(0.047, UPPER_LEN / 2, 0);
-    J2.add(spine1);
 
-    // J3 — elbow at top of upper arm
+    // ── J3 — elbow ──
     const J3 = new THREE.Group();
     J3.position.y = UPPER_LEN;
     J2.add(J3);
 
-    const elbowPivot = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.055, 0.055, 0.105, 24),
+    // Elbow sphere
+    const elbowSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(0.044, 26, 18),
       matJoint
     );
-    elbowPivot.rotation.z = Math.PI / 2;
-    J3.add(elbowPivot);
-    const elbowHub = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.022, 0.022, 0.11, 16),
-      matHub
+    J3.add(elbowSphere);
+    const elbowRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.046, 0.0018, 8, 28),
+      new THREE.MeshStandardMaterial({
+        color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.45,
+        metalness: 0.3, roughness: 0.5
+      })
     );
-    elbowHub.rotation.z = Math.PI / 2;
-    J3.add(elbowHub);
+    elbowRing.rotation.y = Math.PI / 2;
+    J3.add(elbowRing);
 
-    // Forearm (L2 = 0.26)
-    const FORE_LEN = 0.26;
+    // Forearm cylinder
+    const FORE_LEN = 0.24;
     const forearm = new THREE.Mesh(
-      new THREE.BoxGeometry(0.07, FORE_LEN, 0.07),
+      new THREE.CylinderGeometry(0.028, 0.034, FORE_LEN, 26),
       matLink
     );
     forearm.position.y = FORE_LEN / 2;
     J3.add(forearm);
-    // forearm amber stripe
-    const spine2 = new THREE.Mesh(
-      new THREE.BoxGeometry(0.01, FORE_LEN - 0.05, 0.004),
-      matAccent
-    );
-    spine2.position.set(0.037, FORE_LEN / 2, 0);
-    J3.add(spine2);
 
-    // J4 — wrist, combined into one pitch for this view
+    // ── J4 — wrist ──
     const J4 = new THREE.Group();
     J4.position.y = FORE_LEN;
     J3.add(J4);
 
-    const wristPivot = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.038, 0.038, 0.07, 16),
+    // Wrist sphere
+    const wristSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(0.03, 24, 16),
       matJoint
     );
-    wristPivot.rotation.z = Math.PI / 2;
-    J4.add(wristPivot);
-    const wristHub = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.016, 0.016, 0.074, 16),
-      matHub
-    );
-    wristHub.rotation.z = Math.PI / 2;
-    J4.add(wristHub);
+    J4.add(wristSphere);
 
-    // Tool flange (cylinder)
+    // Tool flange
     const flange = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.038, 0.03, 0.05, 18),
+      new THREE.CylinderGeometry(0.024, 0.022, 0.04, 22),
       matLink
     );
-    flange.position.y = 0.045;
+    flange.position.y = 0.032;
     J4.add(flange);
+    // Flange ring — amber accent
     const flangeRing = new THREE.Mesh(
-      new THREE.TorusGeometry(0.038, 0.003, 8, 28),
-      matAccent
+      new THREE.TorusGeometry(0.024, 0.0015, 8, 28),
+      new THREE.MeshStandardMaterial({
+        color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.5,
+        metalness: 0.3, roughness: 0.5
+      })
     );
     flangeRing.rotation.x = Math.PI / 2;
-    flangeRing.position.y = 0.068;
+    flangeRing.position.y = 0.053;
     J4.add(flangeRing);
 
-    // Gripper fingers
-    const fingerGeom = new THREE.BoxGeometry(0.012, 0.055, 0.02);
+    // Modern gripper — two rounded capsule fingers
+    const fingerGeom = new THREE.CapsuleGeometry(0.006, 0.04, 6, 12);
     const finger1 = new THREE.Mesh(fingerGeom, matLink);
-    finger1.position.set( 0.024, 0.115, 0);
+    finger1.position.set( 0.014, 0.085, 0);
     J4.add(finger1);
     const finger2 = new THREE.Mesh(fingerGeom, matLink);
-    finger2.position.set(-0.024, 0.115, 0);
+    finger2.position.set(-0.014, 0.085, 0);
     J4.add(finger2);
-    // inner gripper pad
-    const pad1 = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.035, 0.015), matAccent);
-    pad1.position.set( 0.018, 0.11, 0); J4.add(pad1);
-    const pad2 = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.035, 0.015), matAccent);
-    pad2.position.set(-0.018, 0.11, 0); J4.add(pad2);
 
-    // TCP marker
-    const tcp = new THREE.Mesh(new THREE.SphereGeometry(0.012, 18, 14), matAmber);
-    tcp.position.y = 0.16;
+    // TCP marker — glowing amber sphere
+    const tcp = new THREE.Mesh(new THREE.SphereGeometry(0.009, 16, 12), matAmber);
+    tcp.position.y = 0.118;
     J4.add(tcp);
+
+    // ═══ Glass enclosure ═══
+    const GLASS_W = 0.62;
+    const GLASS_D = 0.55;
+    const GLASS_H = 0.92;
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xd8e4ef,
+      metalness: 0,
+      roughness: 0.08,
+      transparent: true,
+      opacity: 0.06,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const makeGlassWall = (w, h, x, y, z, ry) => {
+      const wall = new THREE.Mesh(new THREE.PlaneGeometry(w, h), glassMat);
+      wall.position.set(x, y, z);
+      wall.rotation.y = ry;
+      return wall;
+    };
+    scene.add(makeGlassWall(GLASS_W, GLASS_H, 0,            GLASS_H/2,  GLASS_D/2, 0));
+    scene.add(makeGlassWall(GLASS_W, GLASS_H, 0,            GLASS_H/2, -GLASS_D/2, Math.PI));
+    scene.add(makeGlassWall(GLASS_D, GLASS_H,  GLASS_W/2,  GLASS_H/2,  0,          -Math.PI/2));
+    scene.add(makeGlassWall(GLASS_D, GLASS_H, -GLASS_W/2,  GLASS_H/2,  0,           Math.PI/2));
+    // top plate
+    const glassTop = new THREE.Mesh(
+      new THREE.PlaneGeometry(GLASS_W, GLASS_D),
+      glassMat
+    );
+    glassTop.rotation.x = Math.PI / 2;
+    glassTop.position.y = GLASS_H;
+    scene.add(glassTop);
+    // Edge hairlines around the case for visual definition
+    const edgeGeom = new THREE.EdgesGeometry(
+      new THREE.BoxGeometry(GLASS_W, GLASS_H, GLASS_D)
+    );
+    const edgeLines = new THREE.LineSegments(
+      edgeGeom,
+      new THREE.LineBasicMaterial({ color: 0x5a5a5a, transparent: true, opacity: 0.55 })
+    );
+    edgeLines.position.y = GLASS_H / 2;
+    scene.add(edgeLines);
+
+    // Amber corner accents on the front bottom edges of the glass
+    const accentGeom = new THREE.CylinderGeometry(0.003, 0.003, 0.04, 8);
+    const accentMat = new THREE.MeshStandardMaterial({
+      color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.7
+    });
+    [-1, 1].forEach(sx => {
+      const c = new THREE.Mesh(accentGeom, accentMat);
+      c.position.set(sx * GLASS_W/2, 0.025, GLASS_D/2);
+      scene.add(c);
+    });
 
     // ───── IK ─────
     const L1 = UPPER_LEN;
     const L2 = FORE_LEN;
-    const SHOULDER_WORLD_Y = 0.07 + 0.13;  // J1.position.y + J2.position.y (approx)
+    const SHOULDER_WORLD_Y = 0.075 + 0.125;  // J1.position.y + J2.position.y
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
     // IK returns angles for J1 (waist yaw), J2 (shoulder pitch), J3 (elbow pitch),
