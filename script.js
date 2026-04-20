@@ -282,6 +282,114 @@
     window.addEventListener('pointerleave', () => { mx = -9999; });
   }
 
+  /* ─── 6DOF robot arm — cursor-tracking IK ─── */
+  const robot = document.querySelector('.robot');
+  if (robot && !reduceMotion && window.matchMedia('(min-width: 1101px)').matches) {
+    const svg      = robot.querySelector('.robot__svg');
+    const jShoulder = document.getElementById('robotShoulder');
+    const jElbow    = document.getElementById('robotElbow');
+    const jWrist    = document.getElementById('robotWrist');
+    const hudJ1     = document.getElementById('robotJ1');
+    const hudJ2     = document.getElementById('robotJ2');
+    const hudJ3     = document.getElementById('robotJ3');
+    const hudJ6     = document.getElementById('robotJ6');
+    const hudMode   = document.getElementById('robotMode');
+
+    // link lengths in SVG viewBox units — match the HTML geometry
+    const L1 = 110;  // shoulder → elbow
+    const L2 = 85;   // elbow → wrist
+    const SHOULDER_VB = { x: 0, y: 0 };   // pivot in viewBox
+    const ELBOW_VB_Y  = -110;
+    const WRIST_VB_Y  = -195;
+
+    let curT1 = 0, curT2 = 0, curT3 = 0;
+    let curJ1 = 0;                   // fake J1 waist motion (decorative)
+    let cursorX = 0, cursorY = 0;
+    let cursorActive = false;
+    let lastCursor = 0;
+
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+    const ik = (tx, ty) => {
+      let d = Math.hypot(tx, ty);
+      const maxR = L1 + L2 - 3;
+      const minR = Math.abs(L1 - L2) + 8;
+      if (d > maxR) { tx *= maxR / d; ty *= maxR / d; d = maxR; }
+      if (d < minR) { tx *= minR / d; ty *= minR / d; d = minR; }
+      const c = clamp((d * d - L1 * L1 - L2 * L2) / (2 * L1 * L2), -1, 1);
+      const theta2 = Math.acos(c);
+      const alpha  = Math.atan2(tx, -ty);
+      const beta   = Math.atan2(L2 * Math.sin(theta2), L1 + L2 * Math.cos(theta2));
+      const theta1 = alpha - beta;
+      return { theta1, theta2 };
+    };
+
+    window.addEventListener('pointermove', (e) => {
+      cursorX = e.clientX;
+      cursorY = e.clientY;
+      cursorActive = true;
+      lastCursor = performance.now();
+    }, { passive: true });
+    window.addEventListener('pointerleave', () => { cursorActive = false; });
+
+    const fmtDeg = (rad) => {
+      const d = rad * 180 / Math.PI;
+      const sign = d >= 0 ? '+' : '−';
+      return sign + Math.abs(d).toFixed(1).padStart(5, '0') + '°';
+    };
+
+    const tickRobot = (t) => {
+      const now = performance.now();
+      const idle = !cursorActive || (now - lastCursor > 2500);
+
+      let tx, ty;
+      if (idle) {
+        hudMode.textContent = 'idle · sweep';
+        hudMode.classList.remove('amber');
+        const p = t * 0.00045;
+        tx = Math.sin(p) * 95;
+        ty = -140 + Math.cos(p * 1.4) * 38;
+      } else {
+        hudMode.textContent = 'tracking';
+        hudMode.classList.add('amber');
+        const rect = svg.getBoundingClientRect();
+        const vb = svg.viewBox.baseVal;
+        // cursor → viewBox coords
+        const sx = ((cursorX - rect.left) / rect.width)  * vb.width  + vb.x;
+        const sy = ((cursorY - rect.top)  / rect.height) * vb.height + vb.y;
+        tx = sx - SHOULDER_VB.x;
+        ty = sy - SHOULDER_VB.y;
+      }
+
+      const { theta1, theta2 } = ik(tx, ty);
+      const targetJ6 = -(theta1 + theta2);      // keep flange pointing "up" in world
+
+      // decorative J1 waist sway
+      const targetJ1 = Math.sin(t * 0.00025) * 0.18 + (idle ? 0 : (cursorX / window.innerWidth - 0.5) * 0.4);
+
+      // critically-damped smoothing
+      const s = 0.14;
+      curT1 += (theta1  - curT1) * s;
+      curT2 += (theta2  - curT2) * s;
+      curT3 += (targetJ6 - curT3) * s;
+      curJ1 += (targetJ1 - curJ1) * s;
+
+      const d2r = 180 / Math.PI;
+      jShoulder.setAttribute('transform', `rotate(${(curT1 * d2r).toFixed(2)} ${SHOULDER_VB.x} ${SHOULDER_VB.y})`);
+      jElbow.setAttribute   ('transform', `rotate(${(curT2 * d2r).toFixed(2)} 0 ${ELBOW_VB_Y})`);
+      jWrist.setAttribute   ('transform', `rotate(${(curT3 * d2r).toFixed(2)} 0 ${WRIST_VB_Y})`);
+
+      hudJ1.textContent = fmtDeg(curJ1);
+      hudJ2.textContent = fmtDeg(curT1);
+      hudJ3.textContent = fmtDeg(curT2);
+      hudJ6.textContent = fmtDeg(curT3);
+
+      requestAnimationFrame(tickRobot);
+    };
+
+    requestAnimationFrame(tickRobot);
+  }
+
   /* ─── keyboard nav shortcut: g then h/l/s/r/c ─── */
   let gMode = false, gTimer = 0;
   const shortcutMap = {
