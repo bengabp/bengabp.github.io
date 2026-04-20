@@ -62,49 +62,237 @@
     el.style.transitionDelay = (i * 80) + 'ms';
   });
 
-  /* ─── generate gear teeth (sun + ring) ─── */
-  const makeTeeth = (hostId, { count, innerR, outerR, color, width = 0.8 }) => {
-    const host = document.getElementById(hostId);
-    if (!host) return;
-    const ns = 'http://www.w3.org/2000/svg';
-    const frag = document.createDocumentFragment();
-    for (let i = 0; i < count; i++) {
-      const angle = (360 / count) * i;
-      const line = document.createElementNS(ns, 'line');
-      const rad = angle * Math.PI / 180;
-      line.setAttribute('x1', (Math.cos(rad) * innerR).toFixed(2));
-      line.setAttribute('y1', (Math.sin(rad) * innerR).toFixed(2));
-      line.setAttribute('x2', (Math.cos(rad) * outerR).toFixed(2));
-      line.setAttribute('y2', (Math.sin(rad) * outerR).toFixed(2));
-      line.setAttribute('stroke', color);
-      line.setAttribute('stroke-width', width);
-      line.setAttribute('stroke-linecap', 'butt');
-      frag.appendChild(line);
-    }
-    host.appendChild(frag);
-  };
-  makeTeeth('sunTeeth',  { count: 24, innerR: 42, outerR: 52, color: 'currentColor', width: 1 });
-  makeTeeth('ringTeeth', { count: 82, innerR: 170, outerR: 180, color: 'currentColor', width: 0.6 });
+  /* ─── 3D planetary gearbox — axial explode / reassemble ─── */
+  const gearStage = document.getElementById('gearbox3d');
+  if (gearStage && typeof THREE !== 'undefined' && !reduceMotion) {
+    const gScene = new THREE.Scene();
+    const gAspect = () => gearStage.clientWidth / Math.max(1, gearStage.clientHeight);
+    const gCamera = new THREE.PerspectiveCamera(35, gAspect(), 0.01, 50);
+    gCamera.position.set(0.9, 0.6, 2.1);
+    gCamera.lookAt(0, 0, 0);
 
-  /* ─── planet teeth on each planet ─── */
-  document.querySelectorAll('.planet-teeth').forEach((host) => {
-    const ns = 'http://www.w3.org/2000/svg';
-    const frag = document.createDocumentFragment();
-    const count = 18;
-    for (let i = 0; i < count; i++) {
-      const angle = (360 / count) * i;
-      const line = document.createElementNS(ns, 'line');
-      const rad = angle * Math.PI / 180;
-      line.setAttribute('x1', (Math.cos(rad) * 30).toFixed(2));
-      line.setAttribute('y1', (Math.sin(rad) * 30).toFixed(2));
-      line.setAttribute('x2', (Math.cos(rad) * 38).toFixed(2));
-      line.setAttribute('y2', (Math.sin(rad) * 38).toFixed(2));
-      line.setAttribute('stroke', 'currentColor');
-      line.setAttribute('stroke-width', '0.7');
-      frag.appendChild(line);
+    const gRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    gRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    gRenderer.setSize(gearStage.clientWidth, gearStage.clientHeight, false);
+    gRenderer.outputEncoding = THREE.sRGBEncoding;
+    gearStage.appendChild(gRenderer.domElement);
+
+    // Lights — neutral key + warm amber fill so the gears read metallic
+    gScene.add(new THREE.AmbientLight(0xffffff, 0.28));
+    const gKey = new THREE.DirectionalLight(0xffffff, 1.25);
+    gKey.position.set(1.5, 2, 2.5);
+    gScene.add(gKey);
+    const gAmber = new THREE.PointLight(0xff6b2b, 1.1, 4, 1.4);
+    gAmber.position.set(0, 0, 1.2);
+    gScene.add(gAmber);
+    const gFill = new THREE.DirectionalLight(0x7b92a8, 0.35);
+    gFill.position.set(-2, -1, 1);
+    gScene.add(gFill);
+
+    // Materials
+    const matPlanet = new THREE.MeshStandardMaterial({
+      color: 0x2b2b2b, metalness: 0.85, roughness: 0.28
+    });
+    const matSun = new THREE.MeshStandardMaterial({
+      color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.18,
+      metalness: 0.75, roughness: 0.3
+    });
+    const matRing = new THREE.MeshStandardMaterial({
+      color: 0x1e1e1e, metalness: 0.75, roughness: 0.42
+    });
+    const matAxle = new THREE.MeshStandardMaterial({
+      color: 0x4a4a4a, metalness: 0.9, roughness: 0.2
+    });
+
+    // Gear shape builder — involute-ish with trapezoidal teeth
+    const makeGearShape = (rootR, outerR, teeth) => {
+      const shape = new THREE.Shape();
+      const tau = Math.PI * 2;
+      const toothAngle  = tau / teeth;
+      const toothHalf   = toothAngle * 0.3;      // tooth width along pitch circle
+      const flankHalf   = toothAngle * 0.5;      // full half-period
+      for (let i = 0; i < teeth; i++) {
+        const base = i * toothAngle;
+        const a1 = base - flankHalf;             // root valley start
+        const a2 = base - toothHalf;             // tooth flank up-start
+        const a3 = base + toothHalf;             // tooth flank down-end
+        const a4 = base + flankHalf;             // root valley end
+        const pts = [
+          [Math.cos(a1) * rootR,  Math.sin(a1) * rootR],
+          [Math.cos(a2) * rootR,  Math.sin(a2) * rootR],
+          [Math.cos(a2) * outerR, Math.sin(a2) * outerR],
+          [Math.cos(a3) * outerR, Math.sin(a3) * outerR],
+          [Math.cos(a3) * rootR,  Math.sin(a3) * rootR],
+          [Math.cos(a4) * rootR,  Math.sin(a4) * rootR],
+        ];
+        pts.forEach(([x, y], k) => {
+          if (i === 0 && k === 0) shape.moveTo(x, y);
+          else shape.lineTo(x, y);
+        });
+      }
+      shape.closePath();
+      return shape;
+    };
+
+    const makeGear = (rootR, outerR, teeth, boreR, thickness, mat) => {
+      const shape = makeGearShape(rootR, outerR, teeth);
+      const hole = new THREE.Path();
+      hole.absarc(0, 0, boreR, 0, Math.PI * 2, false);
+      shape.holes.push(hole);
+      const geom = new THREE.ExtrudeGeometry(shape, {
+        depth: thickness,
+        bevelEnabled: true,
+        bevelSize: 0.008,
+        bevelThickness: 0.008,
+        bevelSegments: 2,
+      });
+      geom.translate(0, 0, -thickness / 2);
+      geom.computeVertexNormals();
+      return new THREE.Mesh(geom, mat);
+    };
+
+    // Ring gear — outer disc with internal teeth (cut from the bore)
+    const makeRingGear = (outerR, toothRoot, toothTip, teeth, thickness, mat) => {
+      const shape = new THREE.Shape();
+      shape.absarc(0, 0, outerR, 0, Math.PI * 2, false);
+      const hole = new THREE.Path();
+      const tau = Math.PI * 2;
+      const toothAngle = tau / teeth;
+      const toothHalf  = toothAngle * 0.3;
+      const flankHalf  = toothAngle * 0.5;
+      // internal teeth — valleys on outer radius, peaks pointing inward
+      for (let i = 0; i < teeth; i++) {
+        const base = i * toothAngle;
+        const a1 = base - flankHalf;
+        const a2 = base - toothHalf;
+        const a3 = base + toothHalf;
+        const a4 = base + flankHalf;
+        const rOut = toothTip;     // outer of the hole (valley) — further from center
+        const rIn  = toothRoot;    // inner of the hole (tooth tip) — closer to center
+        const pts = [
+          [Math.cos(a1) * rOut, Math.sin(a1) * rOut],
+          [Math.cos(a2) * rOut, Math.sin(a2) * rOut],
+          [Math.cos(a2) * rIn,  Math.sin(a2) * rIn],
+          [Math.cos(a3) * rIn,  Math.sin(a3) * rIn],
+          [Math.cos(a3) * rOut, Math.sin(a3) * rOut],
+          [Math.cos(a4) * rOut, Math.sin(a4) * rOut],
+        ];
+        pts.forEach(([x, y], k) => {
+          if (i === 0 && k === 0) hole.moveTo(x, y);
+          else hole.lineTo(x, y);
+        });
+      }
+      hole.closePath();
+      shape.holes.push(hole);
+      const geom = new THREE.ExtrudeGeometry(shape, {
+        depth: thickness,
+        bevelEnabled: true,
+        bevelSize: 0.01, bevelThickness: 0.01,
+        bevelSegments: 2,
+      });
+      geom.translate(0, 0, -thickness / 2);
+      geom.computeVertexNormals();
+      return new THREE.Mesh(geom, mat);
+    };
+
+    // Actually build the parts
+    const GEAR_Z = 0.2;
+
+    const sun = makeGear(0.28, 0.32, 16, 0.09, GEAR_Z, matSun);
+    gScene.add(sun);
+    // sun axle
+    const sunAxle = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 0.36, 18),
+      matAxle
+    );
+    sunAxle.rotation.x = Math.PI / 2;
+    gScene.add(sunAxle);
+
+    // Ring gear
+    const ring = makeRingGear(1.0, 0.72, 0.82, 46, GEAR_Z, matRing);
+    gScene.add(ring);
+
+    // Planets — 6 around a carrier orbit
+    const PLANET_ORBIT = 0.55;
+    const PLANET_ROOT = 0.18;
+    const PLANET_TIP  = 0.22;
+    const planets = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const p = makeGear(PLANET_ROOT, PLANET_TIP, 12, 0.055, GEAR_Z, matPlanet);
+      p.userData.baseX = Math.cos(angle) * PLANET_ORBIT;
+      p.userData.baseY = Math.sin(angle) * PLANET_ORBIT;
+      p.userData.idx   = i;
+      p.position.set(p.userData.baseX, p.userData.baseY, 0);
+      // planet axle
+      const ax = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.028, 0.028, 0.35, 14),
+        matAxle
+      );
+      ax.rotation.x = Math.PI / 2;
+      ax.position.copy(p.position);
+      gScene.add(ax);
+      p.userData.axle = ax;
+      gScene.add(p);
+      planets.push(p);
     }
-    host.appendChild(frag);
-  });
+
+    // Animation constants
+    const CYCLE_MS = 7000;
+    const ease = (x) => 1 - Math.pow(1 - x, 3);
+
+    const resizeGear = () => {
+      gRenderer.setSize(gearStage.clientWidth, gearStage.clientHeight, false);
+      gCamera.aspect = gAspect();
+      gCamera.updateProjectionMatrix();
+    };
+    window.addEventListener('resize', resizeGear, { passive: true });
+
+    const tickGear = (t) => {
+      if (document.hidden) { requestAnimationFrame(tickGear); return; }
+      // 0-0.28 explode, 0.28-0.55 hold-exploded, 0.55-0.80 reassemble, 0.80-1.0 pause
+      const p = (t % CYCLE_MS) / CYCLE_MS;
+      let amt;
+      if (p < 0.28)      amt = ease(p / 0.28);
+      else if (p < 0.55) amt = 1;
+      else if (p < 0.80) amt = 1 - ease((p - 0.55) / 0.25);
+      else               amt = 0;
+
+      // Sun pushed forward most
+      sun.position.z = amt * 0.7;
+      sun.rotation.z = t * 0.0009;
+      sunAxle.position.z = amt * 0.7;
+
+      // Ring goes back
+      ring.position.z = -amt * 0.5;
+      ring.rotation.z = t * 0.00015;
+
+      // Planets at intermediate Z, each staggered slightly for a flowering look
+      planets.forEach((planet, i) => {
+        const stagger = 0.1 + (i % 3) * 0.06;
+        const z = amt * (0.22 + stagger);
+        planet.position.z = z;
+        planet.userData.axle.position.z = z;
+        // counter-rotate relative to sun
+        planet.rotation.z = -t * 0.0015;
+        // subtle radial nudge so exploded planets feel "shot outward"
+        const radialBoost = 1 + amt * 0.15;
+        planet.position.x = planet.userData.baseX * radialBoost;
+        planet.position.y = planet.userData.baseY * radialBoost;
+        planet.userData.axle.position.x = planet.position.x;
+        planet.userData.axle.position.y = planet.position.y;
+      });
+
+      // Subtle camera push on explode
+      gCamera.position.x = 0.9 + amt * 0.15;
+      gCamera.position.z = 2.1 + amt * 0.25;
+      gCamera.lookAt(0, 0, amt * 0.25);
+
+      gRenderer.render(gScene, gCamera);
+      requestAnimationFrame(tickGear);
+    };
+    requestAnimationFrame(tickGear);
+  }
 
   /* ─── subtle parallax on hero name ─── */
   const heroName = document.querySelector('.hero__name');

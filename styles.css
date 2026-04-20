@@ -1008,74 +1008,16 @@ em { font-style: italic; color: var(--chalk); }
 }
 
 .gearbox {
-  width: min(100%, 440px);
+  width: min(100%, 520px);
   aspect-ratio: 1;
   color: var(--ghost);
   position: relative;
   filter: drop-shadow(0 0 60px rgba(255,107,43,0.08));
 }
-.gearbox__svg { width: 100%; height: 100%; }
-.gearbox__halo { opacity: 0.7; }
+.gearbox__stage { width: 100%; height: 100%; position: relative; }
+.gearbox__stage canvas { display: block; width: 100% !important; height: 100% !important; }
 
-/* Explode / reassemble cycle — every 6s the parts fly apart, hold, then
-   snap back into place. More modern than a continuous spin, and the rest
-   state gives the eye a place to land. */
-.gearbox__sun {
-  color: var(--amber);
-  transform-origin: 0 0;
-  animation: sunExplode 6s cubic-bezier(0.7, 0, 0.3, 1) infinite;
-}
-.gearbox__carrier {
-  color: var(--ghost);
-  transform-origin: 0 0;
-  animation: carrierExplode 6s cubic-bezier(0.7, 0, 0.3, 1) infinite;
-}
-.gearbox__carrier .planet-spin {
-  transform-origin: 0 0;
-  animation: planetFly 6s cubic-bezier(0.7, 0, 0.3, 1) infinite;
-  color: var(--amber-hi);
-}
-.gearbox__ring {
-  color: var(--mid);
-  transform-origin: 0 0;
-  animation: ringExplode 6s cubic-bezier(0.7, 0, 0.3, 1) infinite;
-}
-.gearbox__halo {
-  animation: haloPulse 6s cubic-bezier(0.7, 0, 0.3, 1) infinite;
-  transform-origin: 0 0;
-}
-
-@keyframes sunExplode {
-  0%, 100% { transform: translateY(0) scale(1); }
-  30%      { transform: translateY(-36px) scale(1.08); }
-  50%      { transform: translateY(-36px) scale(1.08); }
-  70%      { transform: translateY(0) scale(1); }
-}
-@keyframes carrierExplode {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  30%      { transform: rotate(12deg) scale(1.22); }
-  50%      { transform: rotate(12deg) scale(1.22); }
-  70%      { transform: rotate(0deg) scale(1); }
-}
-/* planets scale up slightly when exploded, so teeth detail reads cleaner */
-@keyframes planetFly {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  30%      { transform: rotate(-16deg) scale(1.15); }
-  50%      { transform: rotate(-16deg) scale(1.15); }
-  70%      { transform: rotate(0deg) scale(1); }
-}
-@keyframes ringExplode {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  30%      { transform: scale(1.08); opacity: 0.55; }
-  50%      { transform: scale(1.08); opacity: 0.55; }
-  70%      { transform: scale(1); opacity: 0.9; }
-}
-@keyframes haloPulse {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  30%      { opacity: 1;   transform: scale(1.15); }
-  50%      { opacity: 1;   transform: scale(1.15); }
-  70%      { opacity: 0.7; transform: scale(1); }
-}
+/* Gearbox is now 3D — see script.js. SVG-era animation keyframes removed. */
 
 .gearbox__legend {
   display: flex;

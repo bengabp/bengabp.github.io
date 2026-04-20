@@ -314,48 +314,7 @@
     <article class="specimen specimen--hero">
       <div class="specimen__left">
         <div class="gearbox" aria-hidden="true">
-          <svg viewBox="-200 -200 400 400" class="gearbox__svg">
-            <defs>
-              <radialGradient id="gearGrad" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#ff7a3a" stop-opacity="0.35"/>
-                <stop offset="100%" stop-color="#ff6b2b" stop-opacity="0"/>
-              </radialGradient>
-            </defs>
-
-            <!-- ambient halo -->
-            <circle class="gearbox__halo" r="195" fill="url(#gearGrad)"/>
-
-            <!-- Ring gear (static) -->
-            <g class="gearbox__ring">
-              <circle r="180" fill="none" stroke="currentColor" stroke-width="0.8" stroke-opacity="0.5"/>
-              <circle r="170" fill="none" stroke="currentColor" stroke-width="0.5" stroke-opacity="0.3"/>
-              <g id="ringTeeth"></g>
-            </g>
-
-            <!-- Carrier with 6 planets -->
-            <g class="gearbox__carrier">
-              <g transform="rotate(0) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
-              <g transform="rotate(60) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
-              <g transform="rotate(120) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
-              <g transform="rotate(180) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
-              <g transform="rotate(240) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
-              <g transform="rotate(300) translate(115 0)"><g class="planet-spin"><circle r="36" fill="none" stroke="currentColor" stroke-width="0.8"/><g class="planet-teeth"></g><circle r="6" fill="currentColor" fill-opacity="0.6"/></g></g>
-            </g>
-
-            <!-- Sun gear -->
-            <g class="gearbox__sun">
-              <circle r="48" fill="none" stroke="currentColor" stroke-width="1"/>
-              <g id="sunTeeth"></g>
-              <circle r="8" fill="currentColor"/>
-              <line x1="0" y1="-48" x2="0" y2="-36" stroke="currentColor" stroke-width="1"/>
-            </g>
-
-            <!-- crosshair measurement lines -->
-            <g class="gearbox__cross" stroke="currentColor" stroke-opacity="0.15" stroke-width="0.4">
-              <line x1="-200" y1="0" x2="200" y2="0" stroke-dasharray="2 4"/>
-              <line x1="0" y1="-200" x2="0" y2="200" stroke-dasharray="2 4"/>
-            </g>
-          </svg>
+          <div id="gearbox3d" class="gearbox__stage"></div>
         </div>
 
         <div class="gearbox__legend mono micro">
@@ -874,12 +833,12 @@
           <span class="ch__arrow" aria-hidden="true">→</span>
         </div>
       </a>
-      <a class="foot__channel" href="tel:+2348165094589">
-        <div class="ch__label mono micro caps">phone</div>
-        <div class="ch__value">+234 <span class="dim">816</span> 509 4589</div>
+      <a class="foot__channel" href="https://t.me/russianben" target="_blank" rel="noopener">
+        <div class="ch__label mono micro caps">telegram</div>
+        <div class="ch__value">@russianben</div>
         <div class="ch__cta mono micro caps">
-          <span class="ch__verb">call</span>
-          <span class="ch__arrow" aria-hidden="true">→</span>
+          <span class="ch__verb">message</span>
+          <span class="ch__arrow" aria-hidden="true">↗</span>
         </div>
       </a>
       <a class="foot__channel" href="https://github.com/bengabp" target="_blank" rel="noopener">

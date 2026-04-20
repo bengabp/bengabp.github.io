@@ -75,6 +75,7 @@ python3 -m http.server 8000
 ## Contact
 
 - email — bengabdev4@gmail.com
+- telegram — [@russianben](https://t.me/russianben)
 - github — [@bengabp](https://github.com/bengabp)
 - x / twitter — [@bengabp](https://x.com/bengabp) (robotics build log)
 - linkedin — [in/bengabp](https://linkedin.com/in/bengabp)
