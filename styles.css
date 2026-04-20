@@ -409,11 +409,11 @@ em { font-style: italic; color: var(--chalk); }
    =══════════════════════════════════════════════════════════════ */
 .robot {
   position: absolute;
-  right: 3%;
-  top: 8%;
+  right: 2%;
+  top: 4%;
   /* leave clearance for the hero__foot status row */
-  bottom: 22%;
-  width: clamp(300px, 32vw, 460px);
+  bottom: 16%;
+  width: clamp(360px, 40vw, 560px);
   z-index: 2;
   cursor: pointer;
   display: flex;
