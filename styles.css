@@ -409,11 +409,11 @@ em { font-style: italic; color: var(--chalk); }
    =══════════════════════════════════════════════════════════════ */
 .robot {
   position: absolute;
-  right: 4%;
-  top: 12%;
-  /* leave a big gap to the hero__foot status row so the HUD never overlaps it */
-  bottom: 34%;
-  width: clamp(240px, 26vw, 360px);
+  right: 3%;
+  top: 8%;
+  /* leave clearance for the hero__foot status row */
+  bottom: 22%;
+  width: clamp(300px, 32vw, 460px);
   z-index: 2;
   cursor: pointer;
   display: flex;

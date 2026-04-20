@@ -300,8 +300,9 @@
 
     const aspect = () => stage.clientWidth / Math.max(1, stage.clientHeight);
     const camera = new THREE.PerspectiveCamera(32, aspect(), 0.01, 50);
-    camera.position.set(0.9, 0.7, 1.5);
-    camera.lookAt(0, 0.45, 0);
+    // pulled back and slightly higher — keeps the whole arm (including base) in frame
+    camera.position.set(1.25, 0.95, 2.1);
+    camera.lookAt(0, 0.42, 0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -309,29 +310,28 @@
     renderer.outputEncoding = THREE.sRGBEncoding;
     stage.appendChild(renderer.domElement);
 
-    // lighting — cool key, warm amber accent
-    scene.add(new THREE.AmbientLight(0xffffff, 0.22));
-    const key = new THREE.DirectionalLight(0xffffff, 1.1);
+    // lighting — neutral/cool only; no warm coloured light pollution
+    scene.add(new THREE.AmbientLight(0xffffff, 0.26));
+    const key = new THREE.DirectionalLight(0xffffff, 1.0);
     key.position.set(2.5, 3, 2);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0x6688aa, 0.35);
-    fill.position.set(-2, 1.5, -1);
+    const fill = new THREE.DirectionalLight(0x8fa3b8, 0.28);
+    fill.position.set(-2.2, 1.2, -1.2);
     scene.add(fill);
-    const amberPoint = new THREE.PointLight(0xff6b2b, 0.85, 1.8, 1.5);
-    amberPoint.position.set(0, 0.6, 0.25);
-    scene.add(amberPoint);
 
-    // materials
-    const matLink  = new THREE.MeshStandardMaterial({ color: 0x242424, metalness: 0.55, roughness: 0.45 });
-    const matLinkB = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.55, roughness: 0.55 });
-    const matJoint = new THREE.MeshStandardMaterial({ color: 0x2e2e2e, metalness: 0.55, roughness: 0.4 });
-    const matAmber = new THREE.MeshStandardMaterial({
+    // materials — OLED-friendly gunmetal, amber reserved for TCP + one or two LEDs
+    const matLink   = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.55, roughness: 0.48 });
+    const matLinkB  = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.5,  roughness: 0.58 });
+    const matJoint  = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.6,  roughness: 0.4 });
+    const matHub    = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.7,  roughness: 0.3 });
+    const matPanel  = new THREE.MeshStandardMaterial({ color: 0x0f0f0f, metalness: 0.35, roughness: 0.6 });
+    // dim "amber accent" — a desaturated warm grey, not the full amber
+    const matAccent = new THREE.MeshStandardMaterial({
+      color: 0x3b2a22, metalness: 0.3, roughness: 0.55
+    });
+    const matAmber  = new THREE.MeshStandardMaterial({
       color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 1.8,
       metalness: 0.2, roughness: 0.5
-    });
-    const matAccent = new THREE.MeshStandardMaterial({
-      color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.6,
-      metalness: 0.3, roughness: 0.55
     });
 
     // ───── build robot ─────
@@ -359,10 +359,13 @@
     base.position.y = 0.04;
     scene.add(base);
 
-    // Amber stripe ring on the base
+    // Thin accent ring on the base — dim amber-tinted metal, not glowing
     const stripe = new THREE.Mesh(
-      new THREE.TorusGeometry(0.205, 0.006, 8, 48),
-      matAccent
+      new THREE.TorusGeometry(0.205, 0.004, 8, 48),
+      new THREE.MeshStandardMaterial({
+        color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.22,
+        metalness: 0.4, roughness: 0.6
+      })
     );
     stripe.rotation.x = Math.PI / 2;
     stripe.position.y = 0.065;
@@ -395,7 +398,7 @@
     const yokeR = new THREE.Mesh(yokeGeom, matJoint); yokeR.rotation.z = Math.PI / 2; yokeR.position.x =  0.05; J2.add(yokeR);
     const shoulderPivot = new THREE.Mesh(
       new THREE.CylinderGeometry(0.028, 0.028, 0.135, 16),
-      matAmber
+      matHub
     );
     shoulderPivot.rotation.z = Math.PI / 2;
     J2.add(shoulderPivot);
@@ -429,7 +432,7 @@
     J3.add(elbowPivot);
     const elbowHub = new THREE.Mesh(
       new THREE.CylinderGeometry(0.022, 0.022, 0.11, 16),
-      matAmber
+      matHub
     );
     elbowHub.rotation.z = Math.PI / 2;
     J3.add(elbowHub);
@@ -463,7 +466,7 @@
     J4.add(wristPivot);
     const wristHub = new THREE.Mesh(
       new THREE.CylinderGeometry(0.016, 0.016, 0.074, 16),
-      matAmber
+      matHub
     );
     wristHub.rotation.z = Math.PI / 2;
     J4.add(wristHub);
