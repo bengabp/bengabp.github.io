@@ -1008,16 +1008,35 @@ em { font-style: italic; color: var(--chalk); }
 }
 
 .gearbox {
-  width: min(100%, 520px);
+  width: min(100%, 440px);
   aspect-ratio: 1;
   color: var(--ghost);
   position: relative;
   filter: drop-shadow(0 0 60px rgba(255,107,43,0.08));
 }
-.gearbox__stage { width: 100%; height: 100%; position: relative; }
-.gearbox__stage canvas { display: block; width: 100% !important; height: 100% !important; }
+.gearbox__svg { width: 100%; height: 100%; }
+.gearbox__halo { opacity: 0.7; }
 
-/* Gearbox is now 3D — see script.js. SVG-era animation keyframes removed. */
+.gearbox__sun {
+  color: var(--amber);
+  transform-origin: 0 0;
+  animation: sunSpin 3s linear infinite;
+}
+.gearbox__carrier {
+  color: var(--ghost);
+  transform-origin: 0 0;
+  animation: carrierSpin 48s linear infinite;
+}
+.gearbox__carrier .planet-spin {
+  transform-origin: 0 0;
+  animation: planetSpin 4.5s linear infinite reverse;
+  color: var(--amber-hi);
+}
+.gearbox__ring { color: var(--mid); }
+
+@keyframes sunSpin      { to { transform: rotate(360deg); } }
+@keyframes carrierSpin  { to { transform: rotate(-360deg); } }
+@keyframes planetSpin   { to { transform: rotate(360deg); } }
 
 .gearbox__legend {
   display: flex;

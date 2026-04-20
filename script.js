@@ -62,284 +62,49 @@
     el.style.transitionDelay = (i * 80) + 'ms';
   });
 
-  /* ─── 3D planetary gearbox — axial explode / reassemble ─── */
-  const gearStage = document.getElementById('gearbox3d');
-  if (gearStage && typeof THREE !== 'undefined' && !reduceMotion) {
-    const gScene = new THREE.Scene();
-    const gAspect = () => gearStage.clientWidth / Math.max(1, gearStage.clientHeight);
-    const gCamera = new THREE.PerspectiveCamera(35, gAspect(), 0.01, 50);
-    gCamera.position.set(0.9, 0.6, 2.1);
-    gCamera.lookAt(0, 0, 0);
-
-    const gRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    gRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    gRenderer.setSize(gearStage.clientWidth, gearStage.clientHeight, false);
-    gRenderer.outputEncoding = THREE.sRGBEncoding;
-    gearStage.appendChild(gRenderer.domElement);
-
-    // Lighting — moody, amber-led
-    gScene.add(new THREE.AmbientLight(0x404040, 0.4));
-    const gKey = new THREE.DirectionalLight(0xf5e8d6, 0.7);
-    gKey.position.set(1.5, 2, 2.5);
-    gScene.add(gKey);
-    const gAmber = new THREE.PointLight(0xff6b2b, 1.4, 5, 1.2);
-    gAmber.position.set(0, 0, 1.4);
-    gScene.add(gAmber);
-
-    // Materials — OLED-dark bodies + amber wire edges = site aesthetic
-    const matBody = new THREE.MeshStandardMaterial({
-      color: 0x0a0a0a, metalness: 0.1, roughness: 0.65,
-      transparent: true, opacity: 0.88
-    });
-    const matBodySun = new THREE.MeshStandardMaterial({
-      color: 0x140a04, metalness: 0.2, roughness: 0.55,
-      emissive: 0xff6b2b, emissiveIntensity: 0.55,
-      transparent: true, opacity: 0.92
-    });
-    const matEdge = new THREE.LineBasicMaterial({
-      color: 0xff6b2b, transparent: true, opacity: 0.85
-    });
-    const matEdgeDim = new THREE.LineBasicMaterial({
-      color: 0xff6b2b, transparent: true, opacity: 0.45
-    });
-    const matAxle = new THREE.MeshStandardMaterial({
-      color: 0x2a2a2a, metalness: 0.9, roughness: 0.2
-    });
-
-    // Factory: extruded gear geometry + hot amber edge overlay, returned as Group
-    const buildGear = (geom, bodyMat, edgeMat) => {
-      const group = new THREE.Group();
-      const body = new THREE.Mesh(geom, bodyMat);
-      group.add(body);
-      const edges = new THREE.LineSegments(
-        new THREE.EdgesGeometry(geom, 20),
-        edgeMat
-      );
-      group.add(edges);
-      group.userData.body = body;
-      group.userData.edges = edges;
-      return group;
-    };
-
-    // Gear shape builder — involute-ish with trapezoidal teeth
-    const makeGearShape = (rootR, outerR, teeth) => {
-      const shape = new THREE.Shape();
-      const tau = Math.PI * 2;
-      const toothAngle  = tau / teeth;
-      const toothHalf   = toothAngle * 0.3;      // tooth width along pitch circle
-      const flankHalf   = toothAngle * 0.5;      // full half-period
-      for (let i = 0; i < teeth; i++) {
-        const base = i * toothAngle;
-        const a1 = base - flankHalf;             // root valley start
-        const a2 = base - toothHalf;             // tooth flank up-start
-        const a3 = base + toothHalf;             // tooth flank down-end
-        const a4 = base + flankHalf;             // root valley end
-        const pts = [
-          [Math.cos(a1) * rootR,  Math.sin(a1) * rootR],
-          [Math.cos(a2) * rootR,  Math.sin(a2) * rootR],
-          [Math.cos(a2) * outerR, Math.sin(a2) * outerR],
-          [Math.cos(a3) * outerR, Math.sin(a3) * outerR],
-          [Math.cos(a3) * rootR,  Math.sin(a3) * rootR],
-          [Math.cos(a4) * rootR,  Math.sin(a4) * rootR],
-        ];
-        pts.forEach(([x, y], k) => {
-          if (i === 0 && k === 0) shape.moveTo(x, y);
-          else shape.lineTo(x, y);
-        });
-      }
-      shape.closePath();
-      return shape;
-    };
-
-    const gearGeom = (rootR, outerR, teeth, boreR, thickness) => {
-      const shape = makeGearShape(rootR, outerR, teeth);
-      const hole = new THREE.Path();
-      hole.absarc(0, 0, boreR, 0, Math.PI * 2, false);
-      shape.holes.push(hole);
-      const geom = new THREE.ExtrudeGeometry(shape, {
-        depth: thickness,
-        bevelEnabled: true,
-        bevelSize: 0.006,
-        bevelThickness: 0.006,
-        bevelSegments: 2,
-      });
-      geom.translate(0, 0, -thickness / 2);
-      geom.computeVertexNormals();
-      return geom;
-    };
-
-    const ringGeom = (outerR, toothRoot, toothTip, teeth, thickness) => {
-      const shape = new THREE.Shape();
-      shape.absarc(0, 0, outerR, 0, Math.PI * 2, false);
-      const hole = new THREE.Path();
-      const tau = Math.PI * 2;
-      const toothAngle = tau / teeth;
-      const toothHalf  = toothAngle * 0.3;
-      const flankHalf  = toothAngle * 0.5;
-      for (let i = 0; i < teeth; i++) {
-        const base = i * toothAngle;
-        const a1 = base - flankHalf;
-        const a2 = base - toothHalf;
-        const a3 = base + toothHalf;
-        const a4 = base + flankHalf;
-        const rOut = toothTip;
-        const rIn  = toothRoot;
-        const pts = [
-          [Math.cos(a1) * rOut, Math.sin(a1) * rOut],
-          [Math.cos(a2) * rOut, Math.sin(a2) * rOut],
-          [Math.cos(a2) * rIn,  Math.sin(a2) * rIn],
-          [Math.cos(a3) * rIn,  Math.sin(a3) * rIn],
-          [Math.cos(a3) * rOut, Math.sin(a3) * rOut],
-          [Math.cos(a4) * rOut, Math.sin(a4) * rOut],
-        ];
-        pts.forEach(([x, y], k) => {
-          if (i === 0 && k === 0) hole.moveTo(x, y);
-          else hole.lineTo(x, y);
-        });
-      }
-      hole.closePath();
-      shape.holes.push(hole);
-      const geom = new THREE.ExtrudeGeometry(shape, {
-        depth: thickness,
-        bevelEnabled: true,
-        bevelSize: 0.008, bevelThickness: 0.008,
-        bevelSegments: 2,
-      });
-      geom.translate(0, 0, -thickness / 2);
-      geom.computeVertexNormals();
-      return geom;
-    };
-
-    // Tooth counts — kept low for a clean, graphic read. Zr = Zs + 2*Zp so
-    // geometry closes. Matches Ben's 3-planet physical build.
-    const Zs = 12, Zp = 9, Zr = 30;
-    const PLANET_COUNT = 3;
-
-    const SUN_ROOT = 0.28, SUN_TIP = 0.32;
-    const PLANET_ROOT = 0.18, PLANET_TIP = 0.22;
-    const RING_TOOTH_ROOT = 0.72, RING_TOOTH_TIP = 0.80;
-    const RING_OUTER = 1.02;
-    const PLANET_ORBIT = 0.50;
-    const GEAR_Z = 0.2;
-
-    // Sun — dark body with amber edge + soft inner glow
-    const sun = buildGear(gearGeom(SUN_ROOT, SUN_TIP, Zs, 0.09, GEAR_Z), matBodySun, matEdge);
-    gScene.add(sun);
-    // Amber inner glow disc behind the sun
-    const sunGlow = new THREE.Mesh(
-      new THREE.CircleGeometry(SUN_TIP * 1.6, 48),
-      new THREE.MeshBasicMaterial({
-        color: 0xff6b2b, transparent: true, opacity: 0.12, depthWrite: false
-      })
-    );
-    sunGlow.position.z = -0.12;
-    gScene.add(sunGlow);
-
-    const sunAxle = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.05, 0.05, 0.36, 18),
-      matAxle
-    );
-    sunAxle.rotation.x = Math.PI / 2;
-    gScene.add(sunAxle);
-
-    // Ring gear (fixed)
-    const ring = buildGear(
-      ringGeom(RING_OUTER, RING_TOOTH_ROOT, RING_TOOTH_TIP, Zr, GEAR_Z),
-      matBody, matEdgeDim
-    );
-    gScene.add(ring);
-
-    // Carrier group — planets are children so they orbit when carrier rotates.
-    const carrierRotate = new THREE.Group();
-    gScene.add(carrierRotate);
-
-    const planets = [];
-    for (let i = 0; i < PLANET_COUNT; i++) {
-      const angle = (i / PLANET_COUNT) * Math.PI * 2;
-      const p = buildGear(gearGeom(PLANET_ROOT, PLANET_TIP, Zp, 0.055, GEAR_Z), matBody, matEdge);
-      p.position.x = Math.cos(angle) * PLANET_ORBIT;
-      p.position.y = Math.sin(angle) * PLANET_ORBIT;
-      p.rotation.z = -angle * (Zs / Zp);
-      carrierRotate.add(p);
-
-      const ax = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.028, 0.028, 0.35, 14),
-        matAxle
-      );
-      ax.rotation.x = Math.PI / 2;
-      ax.position.copy(p.position);
-      carrierRotate.add(ax);
-      p.userData.axle = ax;
-      p.userData.basePhase = -angle * (Zs / Zp);
-      planets.push(p);
+  /* ─── generate gear teeth (sun + ring) ─── */
+  const makeTeeth = (hostId, { count, innerR, outerR, color, width = 0.8 }) => {
+    const host = document.getElementById(hostId);
+    if (!host) return;
+    const ns = 'http://www.w3.org/2000/svg';
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const angle = (360 / count) * i;
+      const line = document.createElementNS(ns, 'line');
+      const rad = angle * Math.PI / 180;
+      line.setAttribute('x1', (Math.cos(rad) * innerR).toFixed(2));
+      line.setAttribute('y1', (Math.sin(rad) * innerR).toFixed(2));
+      line.setAttribute('x2', (Math.cos(rad) * outerR).toFixed(2));
+      line.setAttribute('y2', (Math.sin(rad) * outerR).toFixed(2));
+      line.setAttribute('stroke', color);
+      line.setAttribute('stroke-width', width);
+      line.setAttribute('stroke-linecap', 'butt');
+      frag.appendChild(line);
     }
+    host.appendChild(frag);
+  };
+  makeTeeth('sunTeeth',  { count: 24, innerR: 42, outerR: 52, color: 'currentColor', width: 1 });
+  makeTeeth('ringTeeth', { count: 82, innerR: 170, outerR: 180, color: 'currentColor', width: 0.6 });
 
-    // Proper planetary gear kinematics (fixed ring, sun input):
-    //   ω_carrier  / ω_sun = Zs / (Zs + Zr)
-    //   ω_planet (local to carrier) = −ω_sun × Zs / Zp × (1 − ω_carrier/ω_sun)
-    const OMEGA_SUN_S        = 1.2;                                  // rad/s
-    const CARRIER_RATIO      = Zs / (Zs + Zr);
-    const OMEGA_CARRIER_S    = OMEGA_SUN_S * CARRIER_RATIO;
-    const OMEGA_PLANET_LOCAL = -OMEGA_SUN_S * (Zs / Zp) * (1 - CARRIER_RATIO);
-
-    // Animation cycle
-    const CYCLE_MS = 9000;
-    const ease = (x) => 1 - Math.pow(1 - x, 3);
-
-    const resizeGear = () => {
-      gRenderer.setSize(gearStage.clientWidth, gearStage.clientHeight, false);
-      gCamera.aspect = gAspect();
-      gCamera.updateProjectionMatrix();
-    };
-    window.addEventListener('resize', resizeGear, { passive: true });
-
-    const tickGear = (tMs) => {
-      if (document.hidden) { requestAnimationFrame(tickGear); return; }
-      const tSec = tMs / 1000;
-      const p = (tMs % CYCLE_MS) / CYCLE_MS;
-
-      // Explode phases: 0-0.22 apart, 0.22-0.48 hold, 0.48-0.70 together, 0.70-1 running
-      let amt;
-      if (p < 0.22)      amt = ease(p / 0.22);
-      else if (p < 0.48) amt = 1;
-      else if (p < 0.70) amt = 1 - ease((p - 0.48) / 0.22);
-      else               amt = 0;
-
-      // Continuous, ratio-linked rotation — runs the whole time
-      sun.rotation.z     = OMEGA_SUN_S * tSec;
-      carrierRotate.rotation.z = OMEGA_CARRIER_S * tSec;
-      planets.forEach((planet) => {
-        planet.rotation.z = planet.userData.basePhase + OMEGA_PLANET_LOCAL * tSec;
-      });
-      ring.rotation.z = 0;   // fixed — that's the whole point
-
-      // Axial explode: sun out toward camera, ring back, planets midway
-      sun.position.z     = amt * 0.65;
-      sunAxle.position.z = amt * 0.65;
-      ring.position.z    = -amt * 0.42;
-
-      // Carrier as a whole slides forward for the planets; individual radial
-      // boost gives the "flowering" sense.
-      carrierRotate.position.z = amt * 0.28;
-      planets.forEach((planet, i) => {
-        const baseAngle = (i / PLANET_COUNT) * Math.PI * 2;
-        const radialBoost = 1 + amt * 0.22;
-        planet.position.x = Math.cos(baseAngle) * PLANET_ORBIT * radialBoost;
-        planet.position.y = Math.sin(baseAngle) * PLANET_ORBIT * radialBoost;
-        planet.userData.axle.position.x = planet.position.x;
-        planet.userData.axle.position.y = planet.position.y;
-      });
-
-      // Subtle camera tracking — small zoom during explode
-      gCamera.position.x = 0.9 + amt * 0.12;
-      gCamera.position.z = 2.1 + amt * 0.2;
-      gCamera.lookAt(0, 0, amt * 0.18);
-
-      gRenderer.render(gScene, gCamera);
-      requestAnimationFrame(tickGear);
-    };
-    requestAnimationFrame(tickGear);
-  }
+  /* ─── planet teeth on each planet ─── */
+  document.querySelectorAll('.planet-teeth').forEach((host) => {
+    const ns = 'http://www.w3.org/2000/svg';
+    const frag = document.createDocumentFragment();
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      const angle = (360 / count) * i;
+      const line = document.createElementNS(ns, 'line');
+      const rad = angle * Math.PI / 180;
+      line.setAttribute('x1', (Math.cos(rad) * 30).toFixed(2));
+      line.setAttribute('y1', (Math.sin(rad) * 30).toFixed(2));
+      line.setAttribute('x2', (Math.cos(rad) * 38).toFixed(2));
+      line.setAttribute('y2', (Math.sin(rad) * 38).toFixed(2));
+      line.setAttribute('stroke', 'currentColor');
+      line.setAttribute('stroke-width', '0.7');
+      frag.appendChild(line);
+    }
+    host.appendChild(frag);
+  });
 
   /* ─── subtle parallax on hero name ─── */
   const heroName = document.querySelector('.hero__name');
