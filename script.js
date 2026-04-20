@@ -285,7 +285,7 @@
   /* ─── keyboard nav shortcut: g then h/l/s/r/c ─── */
   let gMode = false, gTimer = 0;
   const shortcutMap = {
-    h: '#top', b: '#brief', l: '#log', a: '#lab', s: '#stack', r: '#repos', c: '#contact'
+    h: '#top', b: '#brief', l: '#log', a: '#lab', s: '#stack', r: '#repos', n: '#langs', c: '#contact'
   };
   window.addEventListener('keydown', (e) => {
     if (e.target.matches('input, textarea')) return;

@@ -1213,6 +1213,139 @@ em { font-style: italic; color: var(--chalk); }
 .ribbon__item sup { color: var(--amber); font-size: 0.85em; }
 
 /* ═══════════════════════════════════════════════════════════════
+   LANGUAGES
+   =══════════════════════════════════════════════════════════════ */
+.langs__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.lang-card {
+  padding: 28px 28px 30px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  transition: background 280ms var(--ease-swift);
+  position: relative;
+}
+.lang-card:hover { background: var(--ink); }
+.lang-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--amber);
+  transition: width 400ms var(--ease-out-quart);
+}
+.lang-card:hover::before { width: 100%; }
+
+.lang-card__head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.flag {
+  width: 72px;
+  height: 48px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+  background: var(--ink);
+  box-shadow: 0 0 0 1px var(--black), 0 0 18px rgba(0, 0, 0, 0.5);
+}
+.flag::after {
+  /* subtle grain veil so the flag blends with the OLED field-report tone */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 30%, rgba(0,0,0,0.2));
+  pointer-events: none;
+}
+.flag svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lang-card__title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.lang-card__title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--chalk);
+  letter-spacing: -0.01em;
+}
+.lang-card__sub {
+  color: var(--mid);
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+}
+
+.cefr {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cefr__slot {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  background: transparent;
+  transition: border-color 260ms var(--ease-swift), color 260ms var(--ease-swift), background 260ms var(--ease-swift), box-shadow 260ms var(--ease-swift);
+}
+.cefr__slot.is-filled {
+  border-color: rgba(255, 107, 43, 0.4);
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+.cefr__slot.is-current {
+  border-color: var(--amber);
+  color: var(--chalk);
+  background: rgba(255, 107, 43, 0.26);
+  box-shadow: 0 0 14px rgba(255, 107, 43, 0.28);
+}
+
+.lang-card__level {
+  color: var(--bone);
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  padding-top: 2px;
+  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+}
+.lang-card__level em {
+  color: var(--chalk);
+  font-size: 1.1em;
+  margin-right: 2px;
+}
+
+@media (max-width: 520px) {
+  .lang-card__head { gap: 14px; }
+  .flag { width: 58px; height: 38px; }
+  .lang-card__title { font-size: 28px; }
+  .cefr__slot { padding: 3px 8px; font-size: 10.5px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    EDUCATION + INTERESTS
    =══════════════════════════════════════════════════════════════ */
 .edu__grid {
