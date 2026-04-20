@@ -335,16 +335,16 @@
     });
 
     // ───── build robot ─────
-    // Floor pad
+    // Floor pad — kept modest so it doesn't dominate the frame
     const pad = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.42, 0.42, 0.008, 48),
+      new THREE.CylinderGeometry(0.28, 0.28, 0.008, 48),
       new THREE.MeshStandardMaterial({ color: 0x0e0e0e, metalness: 0.1, roughness: 0.9 })
     );
     pad.position.y = 0;
     scene.add(pad);
 
-    // Radial ticks on the pad (decorative)
-    const tickRingGeom = new THREE.RingGeometry(0.32, 0.33, 60);
+    // Radial tick ring on the pad (decorative)
+    const tickRingGeom = new THREE.RingGeometry(0.22, 0.225, 60);
     const tickRingMat = new THREE.MeshBasicMaterial({ color: 0x444444, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
     const tickRing = new THREE.Mesh(tickRingGeom, tickRingMat);
     tickRing.rotation.x = -Math.PI / 2;
@@ -353,7 +353,7 @@
 
     // Base mount (short truncated cone)
     const base = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.19, 0.22, 0.06, 32),
+      new THREE.CylinderGeometry(0.15, 0.18, 0.06, 32),
       matLinkB
     );
     base.position.y = 0.04;
@@ -361,7 +361,7 @@
 
     // Thin accent ring on the base — dim amber-tinted metal, not glowing
     const stripe = new THREE.Mesh(
-      new THREE.TorusGeometry(0.205, 0.004, 8, 48),
+      new THREE.TorusGeometry(0.162, 0.004, 8, 48),
       new THREE.MeshStandardMaterial({
         color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.22,
         metalness: 0.4, roughness: 0.6
@@ -513,13 +513,25 @@
 
     // IK returns angles for J1 (waist yaw), J2 (shoulder pitch), J3 (elbow pitch),
     // and J4 (wrist pitch compensation to keep flange vertical-up).
+    // Joint limits approximate a real industrial arm and prevent odd folding.
+    const J2_MIN = -Math.PI / 3;   // -60° (arm can tilt back a bit)
+    const J2_MAX =  Math.PI / 2;   // +90° (arm fully forward, not past horizontal-downward)
+    const J3_MIN = -2.4;           // ~-138° (fully bent)
+    const J3_MAX = -0.05;          // never fully straight; keeps a visible elbow bend
+    const J4_MIN = -Math.PI / 2 * 0.9;
+    const J4_MAX =  Math.PI / 2 * 0.9;
+
     const solveIK = (target /* THREE.Vector3 world coords */) => {
-      const j1 = Math.atan2(target.x, target.z);      // yaw toward target
-      // horizontal distance from base axis
+      // keep target above the pad — prevents arm diving into the floor
+      const safeY = Math.max(SHOULDER_WORLD_Y - 0.08, target.y);
+
+      const j1 = Math.atan2(target.x, target.z);
       const horiz = Math.hypot(target.x, target.z);
-      // in the arm plane: +X=horizontal, +Y=vertical; shoulder at (0, SHOULDER_WORLD_Y)
-      const tx = horiz;
-      const ty = target.y - SHOULDER_WORLD_Y;
+      // require target sit at least slightly in front of the base
+      const safeHoriz = Math.max(0.12, horiz);
+
+      const tx = safeHoriz;
+      const ty = safeY - SHOULDER_WORLD_Y;
 
       let d = Math.hypot(tx, ty);
       const maxR = L1 + L2 - 0.01;
@@ -529,18 +541,19 @@
       if (d < minR) { const k = minR / d; rx = tx * k; ry = ty * k; d = minR; }
 
       const cos3 = clamp((d*d - L1*L1 - L2*L2) / (2*L1*L2), -1, 1);
-      const theta3 = Math.acos(cos3);  // elbow bend (always ≥ 0)
+      const theta3 = Math.acos(cos3);
       const alpha  = Math.atan2(ry, rx);
       const beta   = Math.atan2(L2 * Math.sin(theta3), L1 + L2 * Math.cos(theta3));
-      const theta2_plane = alpha - beta;  // upper-arm angle from horizontal, in plane
+      const theta2_plane = alpha - beta;
 
-      // convert to joint rotations in local frames:
-      //  - When J2.rotation.x = 0, upper arm points up (+Y). Tilting -X rotates it forward.
-      //  - We want arm angle θ from horizontal → rotation.x = θ - π/2 (but Three.js sign flip)
-      //  - After testing: rotation.x = Math.PI/2 - theta2_plane works
-      const j2 = Math.PI / 2 - theta2_plane;
-      const j3 = -theta3;     // bend the elbow "back" (forearm rotates CCW vs upper arm when viewed from -X side)
-      const j4 = -(j2 + j3);  // keep flange vertical-up in world frame (approx)
+      let j2 = Math.PI / 2 - theta2_plane;
+      let j3 = -theta3;
+      // clamp to realistic joint ranges
+      j2 = clamp(j2, J2_MIN, J2_MAX);
+      j3 = clamp(j3, J3_MIN, J3_MAX);
+
+      let j4 = -(j2 + j3);
+      j4 = clamp(j4, J4_MIN, J4_MAX);
       return { j1, j2, j3, j4 };
     };
 
