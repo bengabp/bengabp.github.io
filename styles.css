@@ -1466,6 +1466,12 @@ em { font-style: italic; color: var(--chalk); }
   border-color: var(--line);
   background: transparent;
 }
+.lang-card__badge--soft {
+  color: var(--mid);
+  border-color: var(--rule);
+  background: rgba(255, 255, 255, 0.03);
+  letter-spacing: 0.1em;
+}
 
 .lang-card__title {
   font-family: var(--serif);
@@ -1502,6 +1508,9 @@ em { font-style: italic; color: var(--chalk); }
 .cefr--compact > span.is-current {
   background: var(--amber);
   box-shadow: 0 0 8px var(--amber-glow);
+}
+.cefr--compact > span.is-partial {
+  background: linear-gradient(to right, rgba(255,107,43,0.45) 0 35%, var(--line) 35% 100%);
 }
 
 .lang-card__note {
