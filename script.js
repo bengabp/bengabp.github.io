@@ -210,16 +210,14 @@
       return geom;
     };
 
-    // Tooth counts — chosen so Zr = Zs + 2*Zp (geometry closes) and ratios
-    // are clean. Real 41:1 is compound planetary (beyond scope); this reads
-    // like a proper Zs=16 / Zp=15 / Zr=46 stage.
-    const Zs = 16, Zp = 15, Zr = 46;
+    // Tooth counts — kept low for a clean, graphic read. Zr = Zs + 2*Zp so
+    // geometry closes. Matches Ben's 3-planet physical build.
+    const Zs = 12, Zp = 9, Zr = 30;
+    const PLANET_COUNT = 3;
 
-    // Matched pitch radii (so teeth line up visually): pitch = root + addendum/2
-    // sun pitch radius roughly 0.30, planet ~0.20 → planet orbit = 0.30 + 0.20 = 0.50
     const SUN_ROOT = 0.28, SUN_TIP = 0.32;
     const PLANET_ROOT = 0.18, PLANET_TIP = 0.22;
-    const RING_TOOTH_ROOT = 0.70, RING_TOOTH_TIP = 0.80;   // internal teeth
+    const RING_TOOTH_ROOT = 0.72, RING_TOOTH_TIP = 0.80;
     const RING_OUTER = 1.02;
     const PLANET_ORBIT = 0.50;
     const GEAR_Z = 0.2;
@@ -256,8 +254,8 @@
     gScene.add(carrierRotate);
 
     const planets = [];
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2;
+    for (let i = 0; i < PLANET_COUNT; i++) {
+      const angle = (i / PLANET_COUNT) * Math.PI * 2;
       const p = buildGear(gearGeom(PLANET_ROOT, PLANET_TIP, Zp, 0.055, GEAR_Z), matBody, matEdge);
       p.position.x = Math.cos(angle) * PLANET_ORBIT;
       p.position.y = Math.sin(angle) * PLANET_ORBIT;
@@ -324,7 +322,7 @@
       // boost gives the "flowering" sense.
       carrierRotate.position.z = amt * 0.28;
       planets.forEach((planet, i) => {
-        const baseAngle = (i / 6) * Math.PI * 2;
+        const baseAngle = (i / PLANET_COUNT) * Math.PI * 2;
         const radialBoost = 1 + amt * 0.22;
         planet.position.x = Math.cos(baseAngle) * PLANET_ORBIT * radialBoost;
         planet.position.y = Math.sin(baseAngle) * PLANET_ORBIT * radialBoost;
