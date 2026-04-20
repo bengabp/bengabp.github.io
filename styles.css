@@ -100,6 +100,22 @@ em { font-style: italic; color: var(--chalk); }
 .subtle-link:hover { color: var(--amber); border-color: var(--amber); }
 
 /* ────────── global overlays ────────── */
+
+/* dotted grid — fixed full-viewport, subtle, sits behind everything */
+.dots {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(138,134,132,0.22) 1px, transparent 1px);
+  background-size: 26px 26px;
+  background-position: 0 0;
+  /* soft vignette mask so edges don't look hard-cut against the hero bg */
+  -webkit-mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+  mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+  opacity: 0.9;
+}
+
 .grain {
   position: fixed;
   inset: -50%;
