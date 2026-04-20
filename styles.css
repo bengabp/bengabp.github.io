@@ -416,6 +416,8 @@ em { font-style: italic; color: var(--chalk); }
   width: clamp(240px, 26vw, 360px);
   z-index: 2;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
   animation: fadeSlide 1200ms var(--ease-out-expo) 900ms backwards;
 }
 .robot:focus-visible {
@@ -423,8 +425,8 @@ em { font-style: italic; color: var(--chalk); }
   outline-offset: 4px;
 }
 .robot__stage {
-  width: 100%;
-  height: calc(100% - 54px);
+  flex: 1 1 auto;
+  min-height: 0;
   position: relative;
 }
 .robot__stage canvas {
@@ -525,13 +527,12 @@ em { font-style: italic; color: var(--chalk); }
   stroke-width: 1;
 }
 
-/* HUD — pinned to bottom of .robot box, inside it */
+/* HUD — sits after the stage in the flex column */
 .robot__hud {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  flex: 0 0 auto;
+  position: relative;
   padding: 8px 12px 9px;
+  margin-top: 6px;
   background: rgba(0,0,0,0.7);
   border: 1px solid var(--line);
   border-radius: 2px;
