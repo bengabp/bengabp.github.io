@@ -89,19 +89,21 @@
     gFill.position.set(-2, -1, 1);
     gScene.add(gFill);
 
-    // Materials
+    // Materials — match Ben's actual orange PLA filament
     const matPlanet = new THREE.MeshStandardMaterial({
-      color: 0x2b2b2b, metalness: 0.85, roughness: 0.28
+      color: 0xff6b2b, metalness: 0.15, roughness: 0.55,
+      emissive: 0xff6b2b, emissiveIntensity: 0.04
     });
     const matSun = new THREE.MeshStandardMaterial({
-      color: 0xff6b2b, emissive: 0xff6b2b, emissiveIntensity: 0.18,
-      metalness: 0.75, roughness: 0.3
+      color: 0xff7a3a, metalness: 0.25, roughness: 0.42,
+      emissive: 0xff6b2b, emissiveIntensity: 0.28
     });
     const matRing = new THREE.MeshStandardMaterial({
-      color: 0x1e1e1e, metalness: 0.75, roughness: 0.42
+      color: 0xd85420, metalness: 0.15, roughness: 0.6,
+      emissive: 0xff6b2b, emissiveIntensity: 0.03
     });
     const matAxle = new THREE.MeshStandardMaterial({
-      color: 0x4a4a4a, metalness: 0.9, roughness: 0.2
+      color: 0x2a2a2a, metalness: 0.92, roughness: 0.18
     });
 
     // Gear shape builder — involute-ish with trapezoidal teeth
@@ -195,12 +197,23 @@
       return new THREE.Mesh(geom, mat);
     };
 
-    // Actually build the parts
+    // Tooth counts — chosen so Zr = Zs + 2*Zp (geometry closes) and ratios
+    // are clean. Real 41:1 is compound planetary (beyond scope); this reads
+    // like a proper Zs=16 / Zp=15 / Zr=46 stage.
+    const Zs = 16, Zp = 15, Zr = 46;
+
+    // Matched pitch radii (so teeth line up visually): pitch = root + addendum/2
+    // sun pitch radius roughly 0.30, planet ~0.20 → planet orbit = 0.30 + 0.20 = 0.50
+    const SUN_ROOT = 0.28, SUN_TIP = 0.32;
+    const PLANET_ROOT = 0.18, PLANET_TIP = 0.22;
+    const RING_TOOTH_ROOT = 0.70, RING_TOOTH_TIP = 0.80;   // internal teeth
+    const RING_OUTER = 1.02;
+    const PLANET_ORBIT = 0.50;
     const GEAR_Z = 0.2;
 
-    const sun = makeGear(0.28, 0.32, 16, 0.09, GEAR_Z, matSun);
+    // Sun gear
+    const sun = makeGear(SUN_ROOT, SUN_TIP, Zs, 0.09, GEAR_Z, matSun);
     gScene.add(sun);
-    // sun axle
     const sunAxle = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.36, 18),
       matAxle
@@ -208,37 +221,52 @@
     sunAxle.rotation.x = Math.PI / 2;
     gScene.add(sunAxle);
 
-    // Ring gear
-    const ring = makeRingGear(1.0, 0.72, 0.82, 46, GEAR_Z, matRing);
+    // Ring gear (fixed)
+    const ring = makeRingGear(RING_OUTER, RING_TOOTH_ROOT, RING_TOOTH_TIP, Zr, GEAR_Z, matRing);
     gScene.add(ring);
 
-    // Planets — 6 around a carrier orbit
-    const PLANET_ORBIT = 0.55;
-    const PLANET_ROOT = 0.18;
-    const PLANET_TIP  = 0.22;
+    // Carrier group — planets are children so they orbit when carrier rotates.
+    // Carrier has a secondary group for the "explode push" on Z so rotation &
+    // translation don't fight.
+    const carrierRotate = new THREE.Group();
+    gScene.add(carrierRotate);
+
+    // Planet meshes + axles (axles are siblings, not children of carrierRotate,
+    // because they need to follow the carrier AND the axial explode push)
     const planets = [];
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
-      const p = makeGear(PLANET_ROOT, PLANET_TIP, 12, 0.055, GEAR_Z, matPlanet);
-      p.userData.baseX = Math.cos(angle) * PLANET_ORBIT;
-      p.userData.baseY = Math.sin(angle) * PLANET_ORBIT;
-      p.userData.idx   = i;
-      p.position.set(p.userData.baseX, p.userData.baseY, 0);
-      // planet axle
+      const p = makeGear(PLANET_ROOT, PLANET_TIP, Zp, 0.055, GEAR_Z, matPlanet);
+      p.position.x = Math.cos(angle) * PLANET_ORBIT;
+      p.position.y = Math.sin(angle) * PLANET_ORBIT;
+      // stagger initial tooth phase so teeth mesh properly with sun+ring
+      p.rotation.z = -angle * (Zs / Zp);
+      carrierRotate.add(p);
+
+      // axle rides with the planet — child of carrier
       const ax = new THREE.Mesh(
         new THREE.CylinderGeometry(0.028, 0.028, 0.35, 14),
         matAxle
       );
       ax.rotation.x = Math.PI / 2;
       ax.position.copy(p.position);
-      gScene.add(ax);
+      carrierRotate.add(ax);
       p.userData.axle = ax;
-      gScene.add(p);
+
+      p.userData.basePhase = -angle * (Zs / Zp);
       planets.push(p);
     }
 
-    // Animation constants
-    const CYCLE_MS = 7000;
+    // Proper planetary gear kinematics (fixed ring, sun input):
+    //   ω_carrier  / ω_sun = Zs / (Zs + Zr)
+    //   ω_planet (local to carrier) = −ω_sun × Zs / Zp × (1 − ω_carrier/ω_sun)
+    const OMEGA_SUN_S        = 1.2;                                  // rad/s
+    const CARRIER_RATIO      = Zs / (Zs + Zr);
+    const OMEGA_CARRIER_S    = OMEGA_SUN_S * CARRIER_RATIO;
+    const OMEGA_PLANET_LOCAL = -OMEGA_SUN_S * (Zs / Zp) * (1 - CARRIER_RATIO);
+
+    // Animation cycle
+    const CYCLE_MS = 9000;
     const ease = (x) => 1 - Math.pow(1 - x, 3);
 
     const resizeGear = () => {
@@ -248,45 +276,47 @@
     };
     window.addEventListener('resize', resizeGear, { passive: true });
 
-    const tickGear = (t) => {
+    const tickGear = (tMs) => {
       if (document.hidden) { requestAnimationFrame(tickGear); return; }
-      // 0-0.28 explode, 0.28-0.55 hold-exploded, 0.55-0.80 reassemble, 0.80-1.0 pause
-      const p = (t % CYCLE_MS) / CYCLE_MS;
+      const tSec = tMs / 1000;
+      const p = (tMs % CYCLE_MS) / CYCLE_MS;
+
+      // Explode phases: 0-0.22 apart, 0.22-0.48 hold, 0.48-0.70 together, 0.70-1 running
       let amt;
-      if (p < 0.28)      amt = ease(p / 0.28);
-      else if (p < 0.55) amt = 1;
-      else if (p < 0.80) amt = 1 - ease((p - 0.55) / 0.25);
+      if (p < 0.22)      amt = ease(p / 0.22);
+      else if (p < 0.48) amt = 1;
+      else if (p < 0.70) amt = 1 - ease((p - 0.48) / 0.22);
       else               amt = 0;
 
-      // Sun pushed forward most
-      sun.position.z = amt * 0.7;
-      sun.rotation.z = t * 0.0009;
-      sunAxle.position.z = amt * 0.7;
+      // Continuous, ratio-linked rotation — runs the whole time
+      sun.rotation.z     = OMEGA_SUN_S * tSec;
+      carrierRotate.rotation.z = OMEGA_CARRIER_S * tSec;
+      planets.forEach((planet) => {
+        planet.rotation.z = planet.userData.basePhase + OMEGA_PLANET_LOCAL * tSec;
+      });
+      ring.rotation.z = 0;   // fixed — that's the whole point
 
-      // Ring goes back
-      ring.position.z = -amt * 0.5;
-      ring.rotation.z = t * 0.00015;
+      // Axial explode: sun out toward camera, ring back, planets midway
+      sun.position.z     = amt * 0.65;
+      sunAxle.position.z = amt * 0.65;
+      ring.position.z    = -amt * 0.42;
 
-      // Planets at intermediate Z, each staggered slightly for a flowering look
+      // Carrier as a whole slides forward for the planets; individual radial
+      // boost gives the "flowering" sense.
+      carrierRotate.position.z = amt * 0.28;
       planets.forEach((planet, i) => {
-        const stagger = 0.1 + (i % 3) * 0.06;
-        const z = amt * (0.22 + stagger);
-        planet.position.z = z;
-        planet.userData.axle.position.z = z;
-        // counter-rotate relative to sun
-        planet.rotation.z = -t * 0.0015;
-        // subtle radial nudge so exploded planets feel "shot outward"
-        const radialBoost = 1 + amt * 0.15;
-        planet.position.x = planet.userData.baseX * radialBoost;
-        planet.position.y = planet.userData.baseY * radialBoost;
+        const baseAngle = (i / 6) * Math.PI * 2;
+        const radialBoost = 1 + amt * 0.22;
+        planet.position.x = Math.cos(baseAngle) * PLANET_ORBIT * radialBoost;
+        planet.position.y = Math.sin(baseAngle) * PLANET_ORBIT * radialBoost;
         planet.userData.axle.position.x = planet.position.x;
         planet.userData.axle.position.y = planet.position.y;
       });
 
-      // Subtle camera push on explode
-      gCamera.position.x = 0.9 + amt * 0.15;
-      gCamera.position.z = 2.1 + amt * 0.25;
-      gCamera.lookAt(0, 0, amt * 0.25);
+      // Subtle camera tracking — small zoom during explode
+      gCamera.position.x = 0.9 + amt * 0.12;
+      gCamera.position.z = 2.1 + amt * 0.2;
+      gCamera.lookAt(0, 0, amt * 0.18);
 
       gRenderer.render(gScene, gCamera);
       requestAnimationFrame(tickGear);
