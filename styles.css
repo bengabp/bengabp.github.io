@@ -103,15 +103,6 @@ body[data-section="stack"] {
   --line: #272346;
   --rule: #342e58;
 }
-body[data-section="repos"] {
-  background-color: #082918;
-  --amber:      #4fe3a0;
-  --amber-hi:   #7cf0bb;
-  --amber-soft: rgba(79,227,160,0.14);
-  --amber-glow: rgba(79,227,160,0.38);
-  --line: #1c3b2a;
-  --rule: #264b37;
-}
 body[data-section="langs"] {
   background-color: #22180a;
   --amber:      #ffcb3a;
@@ -1424,90 +1415,6 @@ em { font-style: italic; color: var(--chalk); }
   flex-shrink: 0;
 }
 .stack__note { color: var(--dim); letter-spacing: 0.06em; }
-
-/* ═══════════════════════════════════════════════════════════════
-   REPOS
-   =══════════════════════════════════════════════════════════════ */
-.repo__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 0;
-  border-top: 1px solid var(--line);
-  border-left: 1px solid var(--line);
-}
-.repo {
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: var(--black);
-  transition: background 280ms var(--ease-swift);
-  position: relative;
-}
-.repo:hover { background: var(--ink); }
-.repo a {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 22px 22px 20px;
-  height: 100%;
-  position: relative;
-}
-.repo a::before {
-  content: "↗";
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  color: var(--dim);
-  font-size: 14px;
-  transition: color 220ms var(--ease-swift), transform 220ms var(--ease-swift);
-}
-.repo:hover a::before { color: var(--amber); transform: translate(2px, -2px); }
-
-.repo__head {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.repo__name {
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 16px;
-  color: var(--chalk);
-  letter-spacing: 0;
-}
-.repo__lang { color: var(--mid); }
-.repo__desc {
-  color: var(--bone);
-  font-size: 13px;
-  line-height: 1.6;
-  flex: 1;
-  padding-right: 24px;
-}
-.repo__foot {
-  display: flex;
-  gap: 14px;
-  color: var(--mid);
-  letter-spacing: 0.06em;
-  padding-top: 8px;
-  border-top: 1px dashed var(--line);
-}
-.repo--accent { background: linear-gradient(180deg, rgba(255,107,43,0.03), transparent); }
-.repo--accent:hover { background: linear-gradient(180deg, rgba(255,107,43,0.06), var(--ink)); }
-.repo--more { background: linear-gradient(180deg, var(--ink), var(--black)); }
-.repo--more .repo__name { font-size: 22px; color: var(--ghost); }
-
-.repos__ribbon {
-  margin-top: 34px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  align-items: baseline;
-  padding: 16px 20px;
-  border: 1px solid var(--line);
-  color: var(--mid);
-}
-.ribbon__label { color: var(--amber); letter-spacing: 0.16em; }
-.ribbon__item sup { color: var(--amber); font-size: 0.85em; }
 
 /* ═══════════════════════════════════════════════════════════════
    LANGUAGES — compact grid, room to grow

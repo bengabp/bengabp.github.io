@@ -723,7 +723,6 @@
     { el: document.getElementById('log'),       key: 'log'     },
     { el: document.getElementById('lab'),       key: 'lab'     },
     { el: document.getElementById('stack'),     key: 'stack'   },
-    { el: document.getElementById('repos'),     key: 'repos'   },
     { el: document.getElementById('langs'),     key: 'langs'   },
     { el: document.querySelector('.edu'),       key: 'edu'     },
     { el: document.getElementById('contact'),   key: 'contact' },
@@ -813,7 +812,7 @@
   /* ─── keyboard nav: g+letter shortcuts, plus arrow / pageup-pagedown ─── */
   let gMode = false, gTimer = 0;
   const shortcutMap = {
-    h: '#top', b: '#brief', l: '#log', a: '#lab', s: '#stack', r: '#repos', n: '#langs', c: '#contact'
+    h: '#top', b: '#brief', l: '#log', a: '#lab', s: '#stack', n: '#langs', c: '#contact'
   };
   window.addEventListener('keydown', (e) => {
     if (e.target.matches('input, textarea, [contenteditable="true"]')) return;

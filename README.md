@@ -22,9 +22,8 @@ Sections:
 - `/ 02` — Transmission log (work history, 5 entries, reverse-chronological)
 - `/ 03` — Lab (featured 41 : 1 planetary gearbox + specimen cards)
 - `/ 04` — Stack manifest (animated tech toolbelt + chip grid)
-- `/ 05` — Open repositories (pinned GitHub)
-- `/ 06` — Currently learning (Moscow Polytechnic · Russian · Math · Robotics)
-- `/ 07` — End of transmission (contact)
+- `/ 05` — Currently learning (Moscow Polytechnic · Russian · Math · Robotics)
+- `/ 06` — End of transmission (contact)
 
 ## Stack
 
@@ -66,8 +65,8 @@ python3 -m http.server 8000
 
 - `prefers-reduced-motion: reduce` disables entrance animations, gear rotation,
   the grain shift, and the toolbelt marquee.
-- Keyboard shortcut: press **`g`** then one of **`b` / `l` / `a` / `s` / `r` / `c`**
-  to jump to brief / log / lab / stack / repos / contact.
+- Keyboard shortcut: press **`g`** then one of **`b` / `l` / `a` / `s` / `n` / `c`**
+  to jump to brief / log / lab / stack / langs / contact.
 - Live Lagos clock in the topbar.
 - Cursor-following amber spotlight (disabled on touch & reduced-motion).
 - Active-section highlighting in the top nav via `IntersectionObserver`.
