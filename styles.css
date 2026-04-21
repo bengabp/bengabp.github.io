@@ -427,8 +427,8 @@ em { font-style: italic; color: var(--chalk); }
   position: absolute;
   right: 2%;
   top: 4%;
-  /* leave clearance for the hero__foot status row */
-  bottom: 16%;
+  /* leave clearance for the ticker + hero__foot status row below */
+  bottom: 26%;
   width: clamp(360px, 40vw, 560px);
   z-index: 2;
   cursor: pointer;
