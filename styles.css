@@ -18,7 +18,9 @@
   --bone:  #e9e5dc;
   --chalk: #f5f1e8;
 
-  /* accent — amber from the orange 3D-printed gear */
+  /* accent — amber from the orange 3D-printed gear (default / hero).
+     Per-section overrides live on body[data-section=...] below.
+     Colors are registered via @property so they tween smoothly. */
   --amber:       #ff6b2b;
   --amber-hi:    #ff8a52;
   --amber-soft:  rgba(255,107,43,0.14);
@@ -36,6 +38,66 @@
   /* layout */
   --pad-x: clamp(20px, 6vw, 88px);
   --max-w: 1440px;
+}
+
+/* ────────── section-accent theming ──────────
+   Registering the accent vars lets browsers interpolate them over time,
+   so when body[data-section] changes the whole site re-tints smoothly. */
+@property --amber       { syntax: "<color>"; inherits: true; initial-value: #ff6b2b; }
+@property --amber-hi    { syntax: "<color>"; inherits: true; initial-value: #ff8a52; }
+@property --amber-soft  { syntax: "<color>"; inherits: true; initial-value: rgba(255,107,43,0.14); }
+@property --amber-glow  { syntax: "<color>"; inherits: true; initial-value: rgba(255,107,43,0.35); }
+
+body {
+  transition:
+    --amber       560ms var(--ease-out-quart),
+    --amber-hi    560ms var(--ease-out-quart),
+    --amber-soft  560ms var(--ease-out-quart),
+    --amber-glow  560ms var(--ease-out-quart);
+}
+
+/* hero / top keeps the root amber */
+body[data-section="brief"] {
+  --amber:      #5be3ff;
+  --amber-hi:   #8aecff;
+  --amber-soft: rgba(91,227,255,0.14);
+  --amber-glow: rgba(91,227,255,0.38);
+}
+body[data-section="log"] {
+  --amber:      #c9ff5a;
+  --amber-hi:   #daff87;
+  --amber-soft: rgba(201,255,90,0.14);
+  --amber-glow: rgba(201,255,90,0.38);
+}
+body[data-section="lab"] {
+  --amber:      #ff5cb3;
+  --amber-hi:   #ff89c9;
+  --amber-soft: rgba(255,92,179,0.14);
+  --amber-glow: rgba(255,92,179,0.38);
+}
+body[data-section="stack"] {
+  --amber:      #a78bfa;
+  --amber-hi:   #c4b1ff;
+  --amber-soft: rgba(167,139,250,0.14);
+  --amber-glow: rgba(167,139,250,0.38);
+}
+body[data-section="repos"] {
+  --amber:      #4fe3a0;
+  --amber-hi:   #7cf0bb;
+  --amber-soft: rgba(79,227,160,0.14);
+  --amber-glow: rgba(79,227,160,0.38);
+}
+body[data-section="langs"] {
+  --amber:      #ffcb3a;
+  --amber-hi:   #ffd96d;
+  --amber-soft: rgba(255,203,58,0.14);
+  --amber-glow: rgba(255,203,58,0.38);
+}
+body[data-section="edu"] {
+  --amber:      #7ab8ff;
+  --amber-hi:   #a5cfff;
+  --amber-soft: rgba(122,184,255,0.14);
+  --amber-glow: rgba(122,184,255,0.38);
 }
 
 /* ────────── reset + base ────────── */

@@ -716,13 +716,114 @@
     requestAnimationFrame(tickRobot);
   }
 
-  /* ─── keyboard nav shortcut: g then h/l/s/r/c ─── */
+  /* ─── per-section accent theming + snappy arrow-key section nav ─── */
+  const themed = [
+    { el: document.querySelector('.hero'),      key: 'hero'    },
+    { el: document.getElementById('brief'),     key: 'brief'   },
+    { el: document.getElementById('log'),       key: 'log'     },
+    { el: document.getElementById('lab'),       key: 'lab'     },
+    { el: document.getElementById('stack'),     key: 'stack'   },
+    { el: document.getElementById('repos'),     key: 'repos'   },
+    { el: document.getElementById('langs'),     key: 'langs'   },
+    { el: document.querySelector('.edu'),       key: 'edu'     },
+    { el: document.getElementById('contact'),   key: 'contact' },
+  ].filter(s => s.el);
+
+  document.body.dataset.section = 'hero';
+  if (themed.length && 'IntersectionObserver' in window) {
+    const keyFor = new Map(themed.map(s => [s.el, s.key]));
+    const themeIO = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      if (visible[0]) {
+        const k = keyFor.get(visible[0].target);
+        if (k) document.body.dataset.section = k;
+      }
+    }, { rootMargin: '-40% 0px -40% 0px', threshold: [0, 0.25, 0.5] });
+    themed.forEach(s => themeIO.observe(s.el));
+  }
+
+  /* Snappy scroll — custom rAF animation, bypasses scroll-behavior: smooth. */
+  const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
+  let scrollAnim = 0;
+  const snappyScrollTo = (targetY, duration = 420) => {
+    if (reduceMotion) { window.scrollTo(0, targetY); return; }
+    cancelAnimationFrame(scrollAnim);
+    const startY = window.scrollY;
+    const delta = targetY - startY;
+    if (Math.abs(delta) < 2) return;
+    const t0 = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - t0) / duration);
+      window.scrollTo(0, startY + delta * easeOutQuart(t));
+      if (t < 1) scrollAnim = requestAnimationFrame(step);
+    };
+    scrollAnim = requestAnimationFrame(step);
+  };
+
+  const sectionTops = () => themed.map(s =>
+    s.el.getBoundingClientRect().top + window.scrollY
+  );
+
+  const jumpSection = (dir) => {
+    const tops = sectionTops();
+    const cur = window.scrollY;
+    let targetY;
+    if (dir > 0) {
+      targetY = tops.find(t => t > cur + 12);
+      if (targetY == null) {
+        targetY = document.documentElement.scrollHeight - window.innerHeight;
+      }
+    } else {
+      for (let i = tops.length - 1; i >= 0; i--) {
+        if (tops[i] < cur - 12) { targetY = tops[i]; break; }
+      }
+      if (targetY == null) targetY = 0;
+    }
+    snappyScrollTo(targetY);
+  };
+
+  /* Snappy override for in-page anchor links (nav + anywhere else). */
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    if (!href || href === '#' || href.length < 2) return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    e.preventDefault();
+    const y = target.getBoundingClientRect().top + window.scrollY;
+    snappyScrollTo(y, 480);
+    history.replaceState(null, '', href);
+  });
+
+  /* ─── keyboard nav: g+letter shortcuts, plus arrow / pageup-pagedown ─── */
   let gMode = false, gTimer = 0;
   const shortcutMap = {
     h: '#top', b: '#brief', l: '#log', a: '#lab', s: '#stack', r: '#repos', n: '#langs', c: '#contact'
   };
   window.addEventListener('keydown', (e) => {
-    if (e.target.matches('input, textarea')) return;
+    if (e.target.matches('input, textarea, [contenteditable="true"]')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      e.preventDefault();
+      jumpSection(+1);
+      return;
+    }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault();
+      jumpSection(-1);
+      return;
+    }
+    if (e.key === 'Home') { e.preventDefault(); snappyScrollTo(0, 520); return; }
+    if (e.key === 'End')  {
+      e.preventDefault();
+      snappyScrollTo(document.documentElement.scrollHeight - window.innerHeight, 520);
+      return;
+    }
+
     if (e.key === 'g' && !gMode) {
       gMode = true;
       gTimer = setTimeout(() => { gMode = false; }, 900);
@@ -732,7 +833,10 @@
       clearTimeout(gTimer);
       gMode = false;
       const target = document.querySelector(shortcutMap[e.key]);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (target) {
+        const y = target.getBoundingClientRect().top + window.scrollY;
+        snappyScrollTo(y, 480);
+      }
     }
   });
 
