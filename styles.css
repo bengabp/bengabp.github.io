@@ -50,13 +50,14 @@ body {
 }
 
 /* hero / top keeps pure black */
-body[data-section="brief"]   { background-color: #02141c; }  /* cyan    */
-body[data-section="log"]     { background-color: #0d1505; }  /* lime    */
-body[data-section="lab"]     { background-color: #180516; }  /* pink    */
-body[data-section="stack"]   { background-color: #0c0a20; }  /* violet  */
-body[data-section="repos"]   { background-color: #051a10; }  /* emerald */
-body[data-section="langs"]   { background-color: #151005; }  /* gold    */
-body[data-section="edu"]     { background-color: #05091e; }  /* sky     */
+body[data-section="brief"]   { background-color: #06222e; }  /* cyan    */
+body[data-section="log"]     { background-color: #16210a; }  /* lime    */
+body[data-section="lab"]     { background-color: #260a22; }  /* pink    */
+body[data-section="stack"]   { background-color: #130f2e; }  /* violet  */
+body[data-section="repos"]   { background-color: #082918; }  /* emerald */
+body[data-section="langs"]   { background-color: #22180a; }  /* gold    */
+body[data-section="edu"]     { background-color: #0a1230; }  /* sky     */
+body[data-section="contact"] { background-color: #000000; }  /* back to black */
 
 /* ────────── reset + base ────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

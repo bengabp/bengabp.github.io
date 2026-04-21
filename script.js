@@ -730,18 +730,30 @@
   ].filter(s => s.el);
 
   document.body.dataset.section = 'hero';
-  if (themed.length && 'IntersectionObserver' in window) {
-    const keyFor = new Map(themed.map(s => [s.el, s.key]));
-    const themeIO = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-      if (visible[0]) {
-        const k = keyFor.get(visible[0].target);
-        if (k) document.body.dataset.section = k;
+  if (themed.length) {
+    /* Scroll-based detection: the "current" section is the last one
+       whose top has crossed above a trigger line at 35% viewport.
+       More reliable than intersectionRatio sorting for tall sections. */
+    let themeRaf = 0;
+    const updateSection = () => {
+      themeRaf = 0;
+      const triggerY = window.scrollY + window.innerHeight * 0.35;
+      let current = themed[0].key;
+      for (const s of themed) {
+        const top = s.el.getBoundingClientRect().top + window.scrollY;
+        if (top <= triggerY) current = s.key;
       }
-    }, { rootMargin: '-40% 0px -40% 0px', threshold: [0, 0.25, 0.5] });
-    themed.forEach(s => themeIO.observe(s.el));
+      if (document.body.dataset.section !== current) {
+        document.body.dataset.section = current;
+      }
+    };
+    const scheduleUpdate = () => {
+      if (!themeRaf) themeRaf = requestAnimationFrame(updateSection);
+    };
+    window.addEventListener('scroll',  scheduleUpdate, { passive: true });
+    window.addEventListener('resize',  scheduleUpdate);
+    window.addEventListener('load',    updateSection);
+    updateSection();
   }
 
   /* Snappy scroll — custom rAF animation, bypasses scroll-behavior: smooth. */
