@@ -907,6 +907,18 @@ em { font-style: italic; color: var(--chalk); }
 .link-inline:hover { color: var(--amber); border-color: var(--amber); }
 .link-inline:hover::after { color: var(--amber); }
 
+/* title-context: no dotted underline (it would overlap the role line below);
+   the ↗ arrow alone signals linkability. */
+.log__title .link-inline {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.log__title .link-inline::after {
+  font-size: 0.7em;
+  vertical-align: 0.35em;
+  margin-left: 0.15em;
+}
+
 /* ────────── multi-role entry (LinkedIn-style promotion) ────────── */
 .log__entry--multi .log__body { display: block; }
 
