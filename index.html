@@ -313,6 +313,7 @@
     <!-- Featured project: Planetary gearbox -->
     <article class="specimen specimen--hero">
       <div class="specimen__left">
+        <div class="specimen__media">
         <div class="gearbox" aria-hidden="true">
           <svg viewBox="-200 -200 400 400" class="gearbox__svg">
             <defs>
@@ -357,6 +358,25 @@
             </g>
           </svg>
         </div>
+
+        <figure class="specimen__video">
+          <video
+            class="specimen__video-el"
+            src="media/gearbox.mp4"
+            poster="media/gearbox-poster.jpg"
+            playsinline
+            muted
+            loop
+            autoplay
+            preload="metadata"
+            controls
+          ></video>
+          <figcaption class="specimen__video-cap mono micro caps">
+            <span class="lg-dot amber" aria-hidden="true"></span>
+            live · stability test #1
+          </figcaption>
+        </figure>
+        </div><!-- /.specimen__media -->
 
         <div class="gearbox__legend mono micro">
           <span><span class="lg-dot amber"></span>sun · input · 3s/rev</span>

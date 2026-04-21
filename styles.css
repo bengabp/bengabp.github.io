@@ -301,12 +301,15 @@ em { font-style: italic; color: var(--chalk); }
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 50;
-  background: rgba(0,0,0,0.72);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  /* low-alpha dark overlay so the section theme bleeds through;
+     the blur+saturate keeps nav legible over busy section backgrounds */
+  background: rgba(0,0,0,0.42);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
   font-size: 12px;
+  transition: background-color 560ms var(--ease-out-quart);
 }
 .topbar__row {
   max-width: var(--max-w);
@@ -789,7 +792,7 @@ em { font-style: italic; color: var(--chalk); }
   border: 1px solid var(--line);
   background:
     linear-gradient(180deg, rgba(255,255,255,0.014) 0%, transparent 100%),
-    var(--ink);
+    rgba(0,0,0,0.38);
   padding: 20px 22px 22px;
   position: relative;
   border-radius: 2px;
@@ -1119,6 +1122,15 @@ em { font-style: italic; color: var(--chalk); }
   align-items: center;
   gap: 22px;
 }
+/* gearbox diagram + portrait demo video, side by side */
+.specimen__media {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(14px, 2vw, 28px);
+  width: 100%;
+}
+.specimen__media .gearbox { margin: 0 auto; }
 
 .gearbox {
   width: min(100%, 440px);
@@ -1126,6 +1138,59 @@ em { font-style: italic; color: var(--chalk); }
   color: var(--ghost);
   position: relative;
   filter: drop-shadow(0 0 60px rgba(255,107,43,0.08));
+}
+
+.specimen__video {
+  width: clamp(140px, 22vw, 230px);
+  aspect-ratio: 9 / 16;
+  margin: 0;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.specimen__video::before {
+  /* left-edge amber marker, same language as .spec / .foot__channel */
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--amber);
+  z-index: 2;
+  pointer-events: none;
+}
+.specimen__video-el {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;     /* preserve aspect ratio, no stretching */
+  background: #000;
+}
+.specimen__video-cap {
+  position: absolute;
+  left: 8px; bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  color: var(--bone);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  letter-spacing: 0.12em;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* narrow viewports: stack the video below the gearbox */
+@media (max-width: 820px) {
+  .specimen__media { grid-template-columns: minmax(0, 1fr); }
+  .specimen__video {
+    width: min(60%, 220px);
+    justify-self: center;
+  }
 }
 .gearbox__svg { width: 100%; height: 100%; }
 .gearbox__halo { opacity: 0.7; }
@@ -1238,14 +1303,15 @@ em { font-style: italic; color: var(--chalk); }
   padding: 28px 26px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: var(--black);
+  /* translucent dark overlay so the section theme bleeds through */
+  background: rgba(0,0,0,0.38);
   display: flex;
   flex-direction: column;
   gap: 12px;
   transition: background 320ms var(--ease-swift), border-color 320ms var(--ease-swift);
   position: relative;
 }
-.spec:hover { background: var(--ink); }
+.spec:hover { background: rgba(255,255,255,0.04); }
 .spec:hover .spec__title { color: var(--amber); }
 .spec::before {
   content: "";
@@ -1357,14 +1423,14 @@ em { font-style: italic; color: var(--chalk); }
   padding: 22px 22px 26px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: var(--black);
+  background: rgba(0,0,0,0.38);
   display: flex;
   flex-direction: column;
   gap: 14px;
   transition: background 280ms var(--ease-swift);
 }
-.stack__card:hover { background: var(--ink); }
-.stack__card--soft { background: linear-gradient(180deg, var(--ink), var(--black)); }
+.stack__card:hover { background: rgba(255,255,255,0.04); }
+.stack__card--soft { background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.45)); }
 
 .stack__head {
   color: var(--mid);
@@ -1430,14 +1496,14 @@ em { font-style: italic; color: var(--chalk); }
   padding: 20px 20px 22px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: var(--black);
+  background: rgba(0,0,0,0.38);
   display: flex;
   flex-direction: column;
   gap: 12px;
   transition: background 280ms var(--ease-swift);
   position: relative;
 }
-.lang-card:hover { background: var(--ink); }
+.lang-card:hover { background: rgba(255,255,255,0.04); }
 .lang-card::before {
   content: "";
   position: absolute;
@@ -1554,7 +1620,7 @@ em { font-style: italic; color: var(--chalk); }
 }
 .lang-card__note.dim { color: var(--dim); }
 .lang-card--planned .lang-card__title { font-size: 24px; }
-.lang-card--planned { background: linear-gradient(180deg, var(--ink), var(--black)); }
+.lang-card--planned { background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.45)); }
 
 @media (max-width: 520px) {
   .lang-card { padding: 18px 18px 20px; }
@@ -1575,15 +1641,15 @@ em { font-style: italic; color: var(--chalk); }
   padding: 28px 26px 32px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: var(--black);
+  background: rgba(0,0,0,0.38);
   display: flex;
   flex-direction: column;
   gap: 12px;
   transition: background 280ms var(--ease-swift);
 }
-.edu__card:hover { background: var(--ink); }
+.edu__card:hover { background: rgba(255,255,255,0.04); }
 .edu__card--primary {
-  background: linear-gradient(180deg, rgba(255,107,43,0.05), rgba(255,107,43,0.015) 40%, var(--black));
+  background: linear-gradient(180deg, var(--amber-soft), rgba(0,0,0,0.4) 60%);
   position: relative;
 }
 .edu__card--primary::before {
@@ -1680,7 +1746,7 @@ em { font-style: italic; color: var(--chalk); }
   padding: 22px 22px 20px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: var(--black);
+  background: rgba(0,0,0,0.38);
   position: relative;
   cursor: pointer;
   text-decoration: none;
@@ -1698,7 +1764,7 @@ em { font-style: italic; color: var(--chalk); }
   background: var(--line);
   transition: background 260ms var(--ease-swift);
 }
-.foot__channel:hover { background: var(--ink); }
+.foot__channel:hover { background: rgba(255,255,255,0.04); }
 .foot__channel:hover::before { background: var(--amber); }
 .foot__channel:focus-visible {
   outline: 1px solid var(--amber);
@@ -1758,7 +1824,7 @@ em { font-style: italic; color: var(--chalk); }
 
 /* Static (non-clickable) card — no hover affordance */
 .foot__channel--static { cursor: default; }
-.foot__channel--static:hover { background: var(--black); transform: none; }
+.foot__channel--static:hover { background: rgba(0,0,0,0.38); transform: none; }
 .foot__channel--static:hover::before { background: var(--line); }
 .foot__channel--static:hover .ch__value { color: var(--chalk); }
 .foot__channel--static:hover .ch__cta { border-top-color: var(--line); }
