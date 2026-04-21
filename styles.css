@@ -40,24 +40,97 @@
   --max-w: 1440px;
 }
 
-/* ────────── section-background theming ──────────
-   As you scroll into a section, the page background takes on a subtle
-   tint of that section's identity. Kept dark enough to stay OLED-friendly
-   and preserve contrast against --bone/--chalk text. */
+/* ────────── section theming ──────────
+   Each section shifts the accent (amber), the hairline greys (line/rule),
+   and the page background. Registered custom properties let the tokens
+   interpolate smoothly, so scrolling between sections feels like a theme
+   swap rather than a property change. Contrast against --bone/--chalk
+   text is preserved at every step. */
+@property --amber       { syntax: "<color>"; inherits: true; initial-value: #ff6b2b; }
+@property --amber-hi    { syntax: "<color>"; inherits: true; initial-value: #ff8a52; }
+@property --amber-soft  { syntax: "<color>"; inherits: true; initial-value: rgba(255,107,43,0.14); }
+@property --amber-glow  { syntax: "<color>"; inherits: true; initial-value: rgba(255,107,43,0.35); }
+@property --line        { syntax: "<color>"; inherits: true; initial-value: #262626; }
+@property --rule        { syntax: "<color>"; inherits: true; initial-value: #2e2e2e; }
+
 html,
 body {
-  transition: background-color 560ms var(--ease-out-quart);
+  transition:
+    background-color 560ms var(--ease-out-quart),
+    --amber          560ms var(--ease-out-quart),
+    --amber-hi       560ms var(--ease-out-quart),
+    --amber-soft     560ms var(--ease-out-quart),
+    --amber-glow     560ms var(--ease-out-quart),
+    --line           560ms var(--ease-out-quart),
+    --rule           560ms var(--ease-out-quart);
 }
 
-/* hero / top keeps pure black */
-body[data-section="brief"]   { background-color: #06222e; }  /* cyan    */
-body[data-section="log"]     { background-color: #16210a; }  /* lime    */
-body[data-section="lab"]     { background-color: #260a22; }  /* pink    */
-body[data-section="stack"]   { background-color: #130f2e; }  /* violet  */
-body[data-section="repos"]   { background-color: #082918; }  /* emerald */
-body[data-section="langs"]   { background-color: #22180a; }  /* gold    */
-body[data-section="edu"]     { background-color: #0a1230; }  /* sky     */
-body[data-section="contact"] { background-color: #000000; }  /* back to black */
+/* hero / top keeps the root palette (amber on near-black) */
+
+body[data-section="brief"] {
+  background-color: #06222e;
+  --amber:      #5be3ff;
+  --amber-hi:   #8aecff;
+  --amber-soft: rgba(91,227,255,0.14);
+  --amber-glow: rgba(91,227,255,0.38);
+  --line: #1e3640;
+  --rule: #274450;
+}
+body[data-section="log"] {
+  background-color: #16210a;
+  --amber:      #c9ff5a;
+  --amber-hi:   #daff87;
+  --amber-soft: rgba(201,255,90,0.14);
+  --amber-glow: rgba(201,255,90,0.38);
+  --line: #2a3518;
+  --rule: #36421f;
+}
+body[data-section="lab"] {
+  background-color: #260a22;
+  --amber:      #ff5cb3;
+  --amber-hi:   #ff89c9;
+  --amber-soft: rgba(255,92,179,0.14);
+  --amber-glow: rgba(255,92,179,0.38);
+  --line: #3a1e33;
+  --rule: #47283f;
+}
+body[data-section="stack"] {
+  background-color: #130f2e;
+  --amber:      #a78bfa;
+  --amber-hi:   #c4b1ff;
+  --amber-soft: rgba(167,139,250,0.14);
+  --amber-glow: rgba(167,139,250,0.38);
+  --line: #272346;
+  --rule: #342e58;
+}
+body[data-section="repos"] {
+  background-color: #082918;
+  --amber:      #4fe3a0;
+  --amber-hi:   #7cf0bb;
+  --amber-soft: rgba(79,227,160,0.14);
+  --amber-glow: rgba(79,227,160,0.38);
+  --line: #1c3b2a;
+  --rule: #264b37;
+}
+body[data-section="langs"] {
+  background-color: #22180a;
+  --amber:      #ffcb3a;
+  --amber-hi:   #ffd96d;
+  --amber-soft: rgba(255,203,58,0.14);
+  --amber-glow: rgba(255,203,58,0.38);
+  --line: #3a2c18;
+  --rule: #473721;
+}
+body[data-section="edu"] {
+  background-color: #0a1230;
+  --amber:      #7ab8ff;
+  --amber-hi:   #a5cfff;
+  --amber-soft: rgba(122,184,255,0.14);
+  --amber-glow: rgba(122,184,255,0.38);
+  --line: #1e2748;
+  --rule: #283159;
+}
+body[data-section="contact"] { background-color: #000000; }
 
 /* ────────── reset + base ────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
